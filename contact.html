@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact | Des Lyres en Brie</title>
+    <meta name="description" content="Contacter Des Lyres en Brie : adhésion, prestation, renseignements.">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,800;1,9..144,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+    <header class="site-header" id="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo" aria-label="Des Lyres en Brie - accueil">
+                <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3C4.5 5.5 4.8 9.5 7 12c1.2 1.4 1.2 4 0 6h10c-1.2-2-1.2-4.6 0-6 2.2-2.5 2.5-6.5 0-9"/><path d="M6.2 6.5h11.6"/><path d="M10 6.5V18M12 6.5V18M14 6.5V18"/><path d="M8 21h8"/></svg></span>
+                <span class="logo-text">Des Lyres <em>en Brie</em></span>
+            </a>
+            <nav class="main-nav" id="mainNav">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="association.html" class="nav-link">L'association</a>
+                <a href="agenda.html" class="nav-link">Agenda</a>
+                <a href="galerie.html" class="nav-link">Galerie</a>
+                <a href="contact.html" class="nav-link active">Contact</a>
+                <a href="association.html#rejoindre" class="nav-link nav-cta">Nous rejoindre</a>
+            </nav>
+            <button class="hamburger" id="hamburger" aria-label="Ouvrir le menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-banner">
+            <div class="container">
+                <h1>Contact</h1>
+                <p>Une question, une envie de jouer, un événement ? Écrivez-nous.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container contact-grid">
+                <div class="contact-info reveal">
+                    <div class="contact-item">
+                        <div class="card-icon"><i class="far fa-envelope"></i></div>
+                        <div><strong>E-mail</strong><a href="mailto:contact@deslyresenbrie.fr">contact@deslyresenbrie.fr</a></div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="card-icon"><i class="fas fa-location-dot"></i></div>
+                        <div><strong>Secteur</strong>Brie, Seine-et-Marne (77)</div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="card-icon"><i class="fab fa-facebook-f"></i></div>
+                        <div><strong>Réseaux</strong><a href="#">Suivez-nous sur Facebook</a></div>
+                    </div>
+                </div>
+
+                <form class="form reveal" id="contactForm" novalidate>
+                    <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off">
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="nom">Nom</label>
+                            <input id="nom" name="name" type="text" required autocomplete="name">
+                        </div>
+                        <div class="field">
+                            <label for="email">E-mail</label>
+                            <input id="email" name="email" type="email" required autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="sujet">Sujet</label>
+                        <select id="sujet" name="sujet">
+                            <option value="Renseignement">Renseignement</option>
+                            <option value="Rejoindre l'association">Rejoindre l'association</option>
+                            <option value="Demande de prestation">Demande de prestation</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-dark" style="justify-self:start"><i class="fas fa-paper-plane"></i> Envoyer</button>
+                    <div class="form-status" id="formStatus" role="status"></div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <a href="index.html" class="logo">
+                        <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3C4.5 5.5 4.8 9.5 7 12c1.2 1.4 1.2 4 0 6h10c-1.2-2-1.2-4.6 0-6 2.2-2.5 2.5-6.5 0-9"/><path d="M6.2 6.5h11.6"/><path d="M10 6.5V18M12 6.5V18M14 6.5V18"/><path d="M8 21h8"/></svg></span>
+                        <span class="logo-text">Des Lyres <em>en Brie</em></span>
+                    </a>
+                    <p>Association musicale loi 1901 : faire vivre la musique en Brie, ensemble.</p>
+                    <div class="socials">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="association.html">L'association</a></li>
+                        <li><a href="agenda.html">Agenda</a></li>
+                        <li><a href="galerie.html">Galerie</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:contact@deslyresenbrie.fr"><i class="far fa-envelope"></i> contact@deslyresenbrie.fr</a></li>
+                        <li><i class="fas fa-location-dot"></i> Seine-et-Marne (77)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; <span class="year"></span> Des Lyres en Brie</span>
+                <span>Fait avec <i class="fas fa-heart" style="color:var(--brass)"></i> et beaucoup de musique</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/data.js?v=1"></script>
+    <script src="js/main.js?v=1"></script>
+</body>
+</html>

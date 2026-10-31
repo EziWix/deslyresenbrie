@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda | Des Lyres en Brie</title>
+    <meta name="description" content="Les concerts et rendez-vous de Des Lyres en Brie.">
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,800;1,9..144,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+    <header class="site-header" id="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo" aria-label="Des Lyres en Brie - accueil">
+                <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3C4.5 5.5 4.8 9.5 7 12c1.2 1.4 1.2 4 0 6h10c-1.2-2-1.2-4.6 0-6 2.2-2.5 2.5-6.5 0-9"/><path d="M6.2 6.5h11.6"/><path d="M10 6.5V18M12 6.5V18M14 6.5V18"/><path d="M8 21h8"/></svg></span>
+                <span class="logo-text">Des Lyres <em>en Brie</em></span>
+            </a>
+            <nav class="main-nav" id="mainNav">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="association.html" class="nav-link">L'association</a>
+                <a href="agenda.html" class="nav-link active">Agenda</a>
+                <a href="galerie.html" class="nav-link">Galerie</a>
+                <a href="contact.html" class="nav-link">Contact</a>
+                <a href="association.html#rejoindre" class="nav-link nav-cta">Nous rejoindre</a>
+            </nav>
+            <button class="hamburger" id="hamburger" aria-label="Ouvrir le menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-banner">
+            <div class="container">
+                <h1>Agenda</h1>
+                <p>Concerts, défilés et rendez-vous à venir</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <h2 class="agenda-sub" style="margin-top:0">À venir</h2>
+                <div class="events" id="upcomingEvents"></div>
+
+                <div id="pastBlock">
+                    <h2 class="agenda-sub">Déjà joué</h2>
+                    <div class="events" id="pastEvents"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" style="padding-top:0">
+            <div class="container">
+                <div class="cta-band reveal">
+                    <div>
+                        <h2>Un événement à animer ?</h2>
+                        <p>Fête de village, cérémonie, mariage : parlons-en.</p>
+                    </div>
+                    <a href="contact.html?sujet=prestation" class="btn btn-dark">Demander une prestation <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <a href="index.html" class="logo">
+                        <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3C4.5 5.5 4.8 9.5 7 12c1.2 1.4 1.2 4 0 6h10c-1.2-2-1.2-4.6 0-6 2.2-2.5 2.5-6.5 0-9"/><path d="M6.2 6.5h11.6"/><path d="M10 6.5V18M12 6.5V18M14 6.5V18"/><path d="M8 21h8"/></svg></span>
+                        <span class="logo-text">Des Lyres <em>en Brie</em></span>
+                    </a>
+                    <p>Association musicale loi 1901 : faire vivre la musique en Brie, ensemble.</p>
+                    <div class="socials">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="association.html">L'association</a></li>
+                        <li><a href="agenda.html">Agenda</a></li>
+                        <li><a href="galerie.html">Galerie</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:contact@deslyresenbrie.fr"><i class="far fa-envelope"></i> contact@deslyresenbrie.fr</a></li>
+                        <li><i class="fas fa-location-dot"></i> Seine-et-Marne (77)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; <span class="year"></span> Des Lyres en Brie</span>
+                <span>Fait avec <i class="fas fa-heart" style="color:var(--brass)"></i> et beaucoup de musique</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/data.js?v=1"></script>
+    <script src="js/main.js?v=1"></script>
+</body>
+</html>
