@@ -5,7 +5,28 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { build } from './instruments-models.js';
+
+/* ---------- Modèles 3D (.glb dans models/) ----------
+   Un fichier models/<id>.glb remplace le modèle codé de l'instrument.
+   view : direction de la caméra au premier affichage
+   rot  : rotation [x, y, z] en degrés appliquée au modèle (facultatif) */
+const MODELS_VERSION = 1;  // à incrémenter quand on remplace un .glb
+const GLB = {
+    'trompette':     { view: [0.3, 0.25, 1] },
+    'trombone':      { view: [0.3, 0.25, 1] },
+    'cor':           { view: [0.25, 0.15, 1] },
+    'tuba':          { view: [0.6, 0.15, 1] },
+    'flute':         { view: [0.25, 0.4, 1] },
+    'clarinette':    { view: [0.4, 0.2, 1], rot: [0, 0, -40] },
+    'hautbois':      { view: [0.4, 0.2, 1], rot: [0, 0, -40] },
+    'saxophone':     { view: [0.5, 0.1, 1] },
+    'caisse-claire': { view: [0.3, 0.8, 1] },
+    'grosse-caisse': { view: [0.6, 0.2, 1] },
+    'cymbales':      { view: [0.3, 0.75, 1] },
+    'xylophone':     { view: [0.3, 0.75, 1] },
+};
 
 /* ---------- Contenu ---------- */
 const CATEGORIES = [
@@ -113,9 +134,38 @@ const shadowTex = (() => {
 })();
 const shadowMat = new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false });
 
+const loader = new GLTFLoader();
+const glbCache = new Map();
+
+// Charge models/<id>.glb une seule fois ; null si absent ou illisible
+function loadGlb(id) {
+    if (!GLB[id]) return Promise.resolve(null);
+    if (!glbCache.has(id)) {
+        glbCache.set(id, loader.loadAsync(`models/${id}.glb?v=${MODELS_VERSION}`)
+            .then(gltf => gltf.scene)
+            .catch(err => {
+                console.warn(`Modèle ${id}.glb indisponible, modèle codé utilisé`, err);
+                return null;
+            }));
+    }
+    return glbCache.get(id);
+}
+
+// Le .glb s'il existe, sinon le modèle codé
+async function instrumentObject(id) {
+    const scene = await loadGlb(id);
+    if (!scene) return { ...build(id), shared: false };
+    const cfg = GLB[id];
+    const group = new THREE.Group();
+    const model = scene.clone(true);  // les géométries restent partagées avec le cache
+    if (cfg.rot) model.rotation.set(...cfg.rot.map(THREE.MathUtils.degToRad));
+    group.add(model);
+    return { group, view: new THREE.Vector3(...cfg.view), shared: true };
+}
+
 // Met l'instrument à une taille commune, centré, avec son ombre
-function prepare(id) {
-    const { group, view } = build(id);
+async function prepare(id) {
+    const { group, view, shared } = await instrumentObject(id);
     const box = new THREE.Box3().setFromObject(group);
     const size = box.getSize(new THREE.Vector3());
     group.scale.setScalar(3.2 / Math.max(size.x, size.y, size.z));
@@ -133,11 +183,13 @@ function prepare(id) {
     root.add(shadow);
 
     const radius = box.getBoundingSphere(new THREE.Sphere()).radius;
-    return { root, view, radius };
+    return { root, view, radius, shared };
 }
 
-function dispose(obj) {
-    obj.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+// Libère les géométries, sauf celles d'un .glb gardé en cache
+function dispose(p) {
+    if (p.shared) return;
+    p.root.traverse(o => { if (o.geometry) o.geometry.dispose(); });
 }
 
 // Distance de caméra pour que l'instrument tienne dans le cadre
@@ -209,7 +261,7 @@ function setAutoRotate(on) {
     document.getElementById('btnRotate').classList.toggle('active', on);
 }
 
-function show(id) {
+async function show(id) {
     const inst = byId[id];
     if (!inst) return;
     currentId = id;
@@ -218,11 +270,18 @@ function show(id) {
     history.replaceState(null, '', '#' + id);
     if (!renderer) return;
 
+    viewerEl.classList.add('loading');
+    const next = await prepare(id);
+    if (currentId !== id) {  // un autre instrument a été demandé entre-temps
+        dispose(next);
+        return;
+    }
+    viewerEl.classList.remove('loading');
     if (current) {
         scene.remove(current.root);
-        dispose(current.root);
+        dispose(current);
     }
-    current = prepare(id);
+    current = next;
     scene.add(current.root);
     homePos = current.view.clone().normalize().multiplyScalar(fitDistance(camera, current.radius));
     camera.position.copy(homePos);
@@ -298,7 +357,7 @@ async function makeThumbs() {
     const cam = new THREE.PerspectiveCamera(35, W / H, 0.1, 100);
     for (const inst of INSTRUMENTS) {
         await new Promise(r => setTimeout(r, 16));
-        const p = prepare(inst.id);
+        const p = await prepare(inst.id);
         ts.add(p.root);
         cam.position.copy(p.view.clone().normalize().multiplyScalar(fitDistance(cam, p.radius) * 0.92));
         cam.lookAt(0, 0, 0);
@@ -306,7 +365,7 @@ async function makeThumbs() {
         const img = gridEl.querySelector(`[data-thumb="${inst.id}"]`);
         if (img) img.src = tr.domElement.toDataURL('image/png');
         ts.remove(p.root);
-        dispose(p.root);
+        dispose(p);
     }
     tr.dispose();
 }
