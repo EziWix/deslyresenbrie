@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,800;1,9..144,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=7">
+    <link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
     <header class="site-header" id="header">
@@ -28,6 +28,8 @@
                 <a href="agenda.html" class="nav-link">Agenda</a>
                 <a href="galerie.html" class="nav-link">Galerie</a>
                 <a href="contact.html" class="nav-link active">Contact</a>
+                <a href="livre-dor.html" class="nav-link"><i class="fas fa-feather-pointed"></i> Livre d'or</a>
+                <a href="membres.html" class="nav-link"><i class="fas fa-lock"></i> Membres</a>
             </nav>
             <button class="hamburger" id="hamburger" aria-label="Ouvrir le menu" aria-expanded="false">
                 <span></span><span></span><span></span>
@@ -44,50 +46,69 @@
         </section>
 
         <section class="section">
-            <div class="container contact-grid">
-                <div class="contact-info reveal">
-                    <div class="contact-item">
-                        <div class="card-icon"><i class="far fa-envelope"></i></div>
-                        <div><strong>E-mail</strong><a href="mailto:contact@deslyresenbrie.fr">contact@deslyresenbrie.fr</a></div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="card-icon"><i class="fas fa-location-dot"></i></div>
-                        <div><strong>Adresse</strong><a href="https://www.google.com/maps/search/?api=1&amp;query=Rue+des+Carri%C3%A8res+77169+Boissy-le-Ch%C3%A2tel" target="_blank" rel="noopener">Rue des Carrières<br>77169 Boissy-le-Châtel</a></div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="card-icon"><i class="fab fa-facebook-f"></i></div>
-                        <div><strong>Réseaux</strong><a href="#">Suivez-nous sur Facebook</a></div>
-                    </div>
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-tag">Contactez-nous</span>
+                    <h2 class="section-title">Restons en contact</h2>
                 </div>
+                <div class="contact-grid">
+                    <div class="contact-info reveal">
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fas fa-location-dot"></i></div>
+                            <div><strong>Adresse</strong><a href="https://www.google.com/maps/search/?api=1&amp;query=Rue+des+Carri%C3%A8res+77169+Boissy-le-Ch%C3%A2tel" target="_blank" rel="noopener">Rue des Carrières<br>77169 Boissy-le-Châtel</a></div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                            <div><strong>E-mail</strong><a href="mailto:contact@deslyresenbrie.fr">contact@deslyresenbrie.fr</a></div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fas fa-clock"></i></div>
+                            <div><strong>Répétitions</strong>Horaires communiqués très bientôt</div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="fab fa-facebook-f"></i></div>
+                            <div><strong>Réseaux sociaux</strong><a href="#">Suivez-nous sur Facebook pour nos actualités et vidéos.</a></div>
+                        </div>
+                    </div>
 
-                <form class="form reveal" id="contactForm" novalidate>
-                    <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off">
-                    <div class="form-row">
-                        <div class="field">
-                            <label for="nom">Nom</label>
-                            <input id="nom" name="name" type="text" required autocomplete="name">
+                    <form class="form reveal" id="contactForm" novalidate>
+                        <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off">
+                        <div class="form-row">
+                            <div class="field">
+                                <label for="nom">Nom *</label>
+                                <input id="nom" name="nom" type="text" required autocomplete="family-name" placeholder="Votre nom">
+                            </div>
+                            <div class="field">
+                                <label for="prenom">Prénom *</label>
+                                <input id="prenom" name="prenom" type="text" required autocomplete="given-name" placeholder="Votre prénom">
+                            </div>
                         </div>
                         <div class="field">
-                            <label for="email">E-mail</label>
-                            <input id="email" name="email" type="email" required autocomplete="email">
+                            <label for="email">E-mail *</label>
+                            <input id="email" name="email" type="email" required autocomplete="email" placeholder="votre@email.fr">
                         </div>
-                    </div>
-                    <div class="field">
-                        <label for="sujet">Sujet</label>
-                        <select id="sujet" name="sujet">
-                            <option value="Renseignement">Renseignement</option>
-                            <option value="Rejoindre l'association">Rejoindre l'association</option>
-                            <option value="Demande de prestation">Demande de prestation</option>
-                            <option value="Autre">Autre</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="message">Message</label>
-                        <textarea id="message" name="message" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-dark" style="justify-self:start"><i class="fas fa-paper-plane"></i> Envoyer</button>
-                    <div class="form-status" id="formStatus" role="status"></div>
-                </form>
+                        <div class="field">
+                            <label for="telephone">Téléphone</label>
+                            <input id="telephone" name="telephone" type="tel" autocomplete="tel" placeholder="06 12 34 56 78">
+                        </div>
+                        <div class="field">
+                            <label for="sujet">Sujet *</label>
+                            <select id="sujet" name="sujet" required>
+                                <option value="">Choisir un sujet</option>
+                                <option value="Renseignement">Renseignement</option>
+                                <option value="Rejoindre l'association">Rejoindre l'association</option>
+                                <option value="Demande de prestation">Demande de prestation</option>
+                                <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="message">Message *</label>
+                            <textarea id="message" name="message" required placeholder="Votre message…"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-paper-plane"></i> Envoyer le message</button>
+                        <div class="form-status" id="formStatus" role="status"></div>
+                    </form>
+                </div>
             </div>
             <div class="container map-wrap reveal">
                 <iframe class="map" src="https://maps.google.com/maps?q=Rue%20des%20Carri%C3%A8res%2C%2077169%20Boissy-le-Ch%C3%A2tel&amp;z=15&amp;output=embed" title="Plan d'accès : Rue des Carrières, 77169 Boissy-le-Châtel"
@@ -118,6 +139,8 @@
                         <li><a href="agenda.html">Agenda</a></li>
                         <li><a href="galerie.html">Galerie</a></li>
                         <li><a href="contact.html">Contact</a></li>
+                        <li><a href="livre-dor.html">Livre d'or</a></li>
+                        <li><a href="membres.html">Espace membres</a></li>
                     </ul>
                 </div>
                 <div>
@@ -135,7 +158,7 @@
         </div>
     </footer>
 
-    <script src="js/data.js?v=3"></script>
-    <script src="js/main.js?v=3"></script>
+    <script src="js/data.js?v=4"></script>
+    <script src="js/main.js?v=4"></script>
 </body>
 </html>

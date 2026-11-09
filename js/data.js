@@ -15,16 +15,16 @@ const EVENTS = [
     { date: "2026-10-31", heure: "10h – 12h", titre: "Prestation du marching band", ville: "La Ferté-sous-Jouarre", type: "Marching band" },
     { date: "2026-11-08", titre: "Concert de l'harmonie (CMF)", ville: "Beaumont-sur-Oise (95)", type: "Harmonie" },
     { date: "2026-11-11", titre: "Cérémonie du 11 Novembre", ville: "La Ferté-sous-Jouarre", type: "Fanfare", aConfirmer: true },
-    { date: "2026-11-21", titre: "Concert de la Sainte-Cécile", ville: "Saint-Jean", type: "Harmonie" },
-    { date: "2026-11-28", heure: "17h00", titre: "Prestation du marching band", ville: "Mareuil-lès-Meaux", type: "Marching band" },
+    { date: "2026-11-21", titre: "Concert de la Sainte-Cécile", ville: "Saint-Jean-les-Deux-Jumeaux", type: "Harmonie" },
+    { date: "2026-11-28", heure: "17h00 – 18h45", titre: "Prestation du marching band", ville: "Mareuil-lès-Meaux", type: "Marching band" },
     { date: "2026-11-28", titre: "Concert de la Sainte-Cécile", ville: "Boissy-le-Châtel", type: "Harmonie" },
     { date: "2026-12-04", titre: "Illuminations", ville: "La Ferté-sous-Jouarre", type: "Animation" },
     { date: "2026-12-05", titre: "Téléthon", ville: "Boissy-le-Châtel", type: "Animation" },
     { date: "2026-12-19", heure: "En soirée", titre: "Concert", ville: "Trélou-sur-Marne (02)", type: "Harmonie" },
     { date: "2027-01-09", heure: "15h00", titre: "Concert de l'harmonie", ville: "Chevry-Cossigny", type: "Harmonie", aConfirmer: true },
-    { date: "2027-01-17", heure: "16h00", titre: "Concert du Jour de l'An", lieu: "La Sucrerie", type: "Harmonie" },
+    { date: "2027-01-17", heure: "16h00", titre: "Concert du Jour de l'An", lieu: "La Sucrerie", ville: "Coulommiers", type: "Harmonie" },
     { date: "2027-03-21", titre: "Concert caritatif", ville: "Pontault-Combault", type: "Harmonie" },
-    { date: "2027-11-14", titre: "Rassemblement CMF : concert individuel et morceau en commun", ville: "Vaires-sur-Marne", type: "Harmonie" }
+    { date: "2027-11-14", titre: "Rencontre FM77 : concert individuel et morceau en commun", ville: "Vaires-sur-Marne", type: "Harmonie" }
 ];
 
 /*
@@ -47,6 +47,15 @@ const TRACKS = [
 */
 const PHOTOS = [
     // { src: "images/galerie/repetition-1.jpg", legende: "Première répétition" },
+];
+
+/*
+   LIVRE D'OR
+   Les messages envoyés depuis le site arrivent par mail (Web3Forms).
+   Pour publier un message, l'ajouter ici :
+   { nom: "...", date: "AAAA-MM-JJ", message: "..." }
+*/
+const GUESTBOOK = [
 ];
 
 /*

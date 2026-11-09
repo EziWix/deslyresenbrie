@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace membres | Des Lyres en Brie</title>
+    <meta name="robots" content="noindex">
+    <meta name="description" content="Espace réservé aux musiciens de Des Lyres en Brie.">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="192x192" href="images/favicon-192.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,800;1,9..144,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=8">
+</head>
+<body>
+    <header class="site-header" id="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo" aria-label="Des Lyres en Brie - accueil">
+                <img class="logo-mark" src="images/logo-mark.png" alt="" width="62" height="46">
+                <span class="logo-text">Des Lyres <em>en Brie</em></span>
+            </a>
+            <nav class="main-nav" id="mainNav">
+                <a href="index.html" class="nav-link">Accueil</a>
+                <a href="association.html" class="nav-link">L'association</a>
+                <a href="instruments.html" class="nav-link">Instruments</a>
+                <a href="agenda.html" class="nav-link">Agenda</a>
+                <a href="galerie.html" class="nav-link">Galerie</a>
+                <a href="contact.html" class="nav-link">Contact</a>
+                <a href="livre-dor.html" class="nav-link"><i class="fas fa-feather-pointed"></i> Livre d'or</a>
+                <a href="membres.html" class="nav-link active"><i class="fas fa-lock"></i> Membres</a>
+            </nav>
+            <button class="hamburger" id="hamburger" aria-label="Ouvrir le menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-banner">
+            <div class="container">
+                <h1><i class="fas fa-lock"></i> Espace membres</h1>
+                <p>Réservé aux musiciens de l'association</p>
+            </div>
+        </section>
+
+        <section class="section" id="loginSection">
+            <div class="container">
+                <div class="login-card reveal">
+                    <div class="login-icon"><i class="fas fa-music"></i></div>
+                    <h2>Accès réservé</h2>
+                    <p>Entrez le mot de passe pour accéder à l'espace membres.</p>
+                    <form id="loginForm" class="login-form">
+                        <input type="password" id="passwordInput" placeholder="Mot de passe" required autocomplete="current-password" aria-label="Mot de passe">
+                        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-right-to-bracket"></i> Accéder</button>
+                        <p class="login-error" id="loginError" hidden><i class="fas fa-circle-exclamation"></i> Mot de passe incorrect</p>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="membersSection" hidden>
+            <div class="container">
+                <div id="membersContent"></div>
+                <p style="text-align:center;margin-top:40px">
+                    <button type="button" class="btn btn-outline" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Se déconnecter</button>
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <a href="index.html" class="logo">
+                        <img class="logo-mark" src="images/logo-mark.png" alt="" width="62" height="46">
+                        <span class="logo-text">Des Lyres <em>en Brie</em></span>
+                    </a>
+                    <p>Association musicale loi 1901 : faire vivre la musique en Brie, ensemble.</p>
+                    <div class="socials">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="association.html">L'association</a></li>
+                        <li><a href="instruments.html">Instruments</a></li>
+                        <li><a href="agenda.html">Agenda</a></li>
+                        <li><a href="galerie.html">Galerie</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="livre-dor.html">Livre d'or</a></li>
+                        <li><a href="membres.html">Espace membres</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:contact@deslyresenbrie.fr"><i class="far fa-envelope"></i> contact@deslyresenbrie.fr</a></li>
+                        <li><a href="https://www.google.com/maps/search/?api=1&amp;query=Rue+des+Carri%C3%A8res+77169+Boissy-le-Ch%C3%A2tel" target="_blank" rel="noopener"><i class="fas fa-location-dot"></i> Rue des Carrières<br>77169 Boissy-le-Châtel</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; <span class="year"></span> Des Lyres en Brie</span>
+                <span>Fait avec <i class="fas fa-heart" style="color:var(--brass)"></i> et beaucoup de musique</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/data.js?v=4"></script>
+    <script src="js/membres-data.js?v=1"></script>
+    <script src="js/membres.js?v=1"></script>
+    <script src="js/main.js?v=4"></script>
+</body>
+</html>

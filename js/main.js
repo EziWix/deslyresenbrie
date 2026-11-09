@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderGallery();
     initPlayer();
     initContactForm();
+    initGuestbook();
     document.querySelectorAll('.year').forEach(el => { el.textContent = new Date().getFullYear(); });
 });
 
@@ -52,6 +53,7 @@ function initReveal() {
 }
 
 /* ---------- Agenda ---------- */
+const MOIS_LONGS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 const MOIS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
 
 function parseDate(str) {
@@ -237,21 +239,12 @@ function initPlayer() {
     load(0, false);
 }
 
-/* ---------- Formulaire de contact (Web3Forms) ---------- */
-function initContactForm() {
-    const form = document.getElementById('contactForm');
-    if (!form) return;
-    const status = document.getElementById('formStatus');
+/* ---------- Formulaires (Web3Forms : les messages arrivent par mail) ---------- */
+function initWebForm(form, statusEl, { subject, ok }) {
     const btn = form.querySelector('button[type="submit"]');
-
-    // contact.html?sujet=rejoindre|prestation présélectionne le sujet
-    const preset = { rejoindre: "Rejoindre l'association", prestation: 'Demande de prestation' }[
-        new URLSearchParams(location.search).get('sujet')];
-    if (preset) form.querySelector('#sujet').value = preset;
-
     const setStatus = (type, text) => {
-        status.className = 'form-status ' + type;
-        status.textContent = text;
+        statusEl.className = 'form-status ' + type;
+        statusEl.textContent = text;
     };
 
     form.addEventListener('submit', async e => {
@@ -265,7 +258,7 @@ function initContactForm() {
 
         const data = new FormData(form);
         data.append('access_key', WEB3FORMS_KEY);
-        data.append('subject', 'Nouveau message — ' + (data.get('sujet') || 'site Des Lyres en Brie'));
+        data.append('subject', subject(data));
         data.append('from_name', 'Site Des Lyres en Brie');
 
         btn.disabled = true;
@@ -277,7 +270,7 @@ function initContactForm() {
             const json = await res.json();
             if (json.success) {
                 form.reset();
-                setStatus('ok', 'Merci ! Votre message a bien été envoyé, nous vous répondons vite.');
+                setStatus('ok', ok);
             } else {
                 setStatus('err', "L'envoi a échoué. Réessayez ou écrivez-nous par mail.");
             }
@@ -288,4 +281,52 @@ function initContactForm() {
             btn.innerHTML = label;
         }
     });
+}
+
+function initContactForm() {
+    const form = document.getElementById('contactForm');
+    if (!form) return;
+
+    // contact.html?sujet=rejoindre|prestation présélectionne le sujet
+    const preset = { rejoindre: "Rejoindre l'association", prestation: 'Demande de prestation' }[
+        new URLSearchParams(location.search).get('sujet')];
+    if (preset) form.querySelector('#sujet').value = preset;
+
+    initWebForm(form, document.getElementById('formStatus'), {
+        subject: d => `Contact — ${d.get('sujet')} — ${d.get('prenom')} ${d.get('nom')}`,
+        ok: 'Merci ! Votre message a bien été envoyé, nous vous répondons vite.',
+    });
+}
+
+/* ---------- Livre d'or ---------- */
+const escapeHTML = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function initGuestbook() {
+    const list = document.getElementById('guestbook');
+    if (list && typeof GUESTBOOK !== 'undefined') {
+        const msgs = [...GUESTBOOK].sort((a, b) => parseDate(b.date) - parseDate(a.date));
+        document.getElementById('guestCount').textContent =
+            msgs.length ? `${msgs.length} message${msgs.length > 1 ? 's' : ''}` : 'Vos messages';
+        list.innerHTML = msgs.length
+            ? msgs.map(m => {
+                const d = parseDate(m.date);
+                return `
+                <article class="guest-message reveal visible">
+                    <div class="guest-header">
+                        <strong>${escapeHTML(m.nom)}</strong>
+                        <span class="guest-date">${d.getDate()} ${MOIS_LONGS[d.getMonth()]} ${d.getFullYear()}</span>
+                    </div>
+                    <p>${escapeHTML(m.message).replace(/\n/g, '<br>')}</p>
+                </article>`;
+            }).join('')
+            : `<div class="events-empty"><i class="fas fa-feather-pointed"></i>Aucun message pour l'instant : soyez le premier à écrire dans notre livre d'or !</div>`;
+    }
+
+    const form = document.getElementById('guestForm');
+    if (form) {
+        initWebForm(form, document.getElementById('guestStatus'), {
+            subject: d => `Livre d'or — message de ${d.get('nom')}`,
+            ok: "Merci pour votre message ! Il apparaîtra dans le livre d'or après relecture.",
+        });
+    }
 }
