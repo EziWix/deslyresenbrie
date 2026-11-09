@@ -78,7 +78,10 @@ function eventHTML(ev, past) {
                     ${lieu ? `<span><i class="fas fa-location-dot"></i>${lieu}</span>` : ''}
                 </div>
             </div>
-            ${ev.type ? `<span class="event-tag">${ev.type}</span>` : ''}
+            <div class="event-tags">
+                ${ev.type ? `<span class="event-tag">${ev.type}</span>` : ''}
+                ${ev.aConfirmer && !past ? '<span class="event-tag event-tbc"><i class="fas fa-circle-question"></i> À confirmer</span>' : ''}
+            </div>
         </article>`;
 }
 

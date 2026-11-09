@@ -230,6 +230,8 @@ a { color: inherit; text-decoration: none; }
     font-size: .78rem; font-weight: 700; padding: 6px 12px; border-radius: 999px;
     background: rgba(227,19,31,.1); color: var(--brass-dark); white-space: nowrap;
 }
+.event-tags { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.event-tbc { background: transparent; border: 1.5px dashed var(--brass); color: var(--brass-dark); }
 .event.past { opacity: .55; }
 .event.past .event-date { background: var(--muted); }
 .events-empty {
@@ -371,7 +373,7 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 600px) {
     .section { padding: 72px 0; }
     .event { grid-template-columns: 72px 1fr; gap: 16px; padding: 16px; }
-    .event-tag { grid-column: 2; justify-self: start; }
+    .event-tags { grid-column: 2; flex-direction: row; flex-wrap: wrap; align-items: center; }
     .event-day { font-size: 1.6rem; }
     .form { padding: 24px; }
     .form-row { grid-template-columns: 1fr; }
