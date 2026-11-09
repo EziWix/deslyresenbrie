@@ -116,7 +116,7 @@ function makeScene(renderer) {
     // lumière de contour, pour détacher les instruments sombres du fond
     const rim = new THREE.DirectionalLight(0xfff1d6, 1.6);
     rim.position.set(-3, 2, -4);
-    scene.add(key, rim, new THREE.HemisphereLight(0xfff4dd, 0x1d2a24, 0.5));
+    scene.add(key, rim, new THREE.HemisphereLight(0xfff4dd, 0x1a1a1a, 0.5));
     return scene;
 }
 
