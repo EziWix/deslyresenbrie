@@ -37,6 +37,19 @@ const EVENTS = [
 ];
 
 /*
+   ÉCOUTER (lecteur de l'accueil)
+   - Déposer les .mp3 dans le dossier audio/
+   - Puis ajouter une ligne ici : { titre: "...", src: "audio/nom.mp3" }
+*/
+const TRACKS = [
+    { titre: "The Witch and the Saint", src: "audio/the-witch-and-the-saint.mp3" },
+    { titre: "Dans les yeux d'Émilie", src: "audio/dans-les-yeux-demilie.mp3" },
+    { titre: "France Gall", src: "audio/france-gall.mp3" },
+    { titre: "Forrest Gump", src: "audio/forrest-gump.mp3" },
+    { titre: "A Klezmer Karnival", src: "audio/a-klezmer-karnival.mp3" }
+];
+
+/*
    GALERIE
    - Déposer les photos dans le dossier images/galerie/
    - Puis ajouter une ligne ici : { src: "images/galerie/nom.jpg", legende: "..." }

@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,800;1,9..144,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
     <header class="site-header" id="header">
@@ -118,6 +118,39 @@
             </div>
         </section>
 
+        <section class="section section-alt" id="ecouter">
+            <div class="container">
+                <div class="section-header reveal">
+                    <span class="section-tag">Écouter</span>
+                    <h2 class="section-title">Un peu de musique</h2>
+                </div>
+                <div class="player reveal" id="player">
+                    <div class="player-main">
+                        <div class="player-now">
+                            <button class="player-play" id="playBtn" type="button" aria-label="Lecture"><i class="fas fa-play"></i></button>
+                            <div class="player-meta">
+                                <span class="player-label">En cours</span>
+                                <span class="player-title" id="trackTitle"></span>
+                            </div>
+                        </div>
+                        <div class="player-progress" id="progress" role="slider" aria-label="Position dans le morceau" tabindex="0">
+                            <div class="player-progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="player-times"><span id="timeCurrent">0:00</span><span id="timeTotal">0:00</span></div>
+                        <div class="player-controls">
+                            <button type="button" id="prevTrack" aria-label="Morceau précédent"><i class="fas fa-backward-step"></i></button>
+                            <button type="button" id="nextTrack" aria-label="Morceau suivant"><i class="fas fa-forward-step"></i></button>
+                            <label class="player-volume"><i class="fas fa-volume-low"></i>
+                                <input type="range" id="volume" min="0" max="1" step="0.05" value="0.8" aria-label="Volume">
+                            </label>
+                        </div>
+                    </div>
+                    <ol class="player-list" id="playlist"></ol>
+                    <audio id="audio" preload="metadata"></audio>
+                </div>
+            </div>
+        </section>
+
         <section class="section">
             <div class="container">
                 <div class="section-header reveal">
@@ -183,7 +216,7 @@
         </div>
     </footer>
 
-    <script src="js/data.js?v=1"></script>
-    <script src="js/main.js?v=1"></script>
+    <script src="js/data.js?v=2"></script>
+    <script src="js/main.js?v=2"></script>
 </body>
 </html>
