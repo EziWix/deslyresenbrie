@@ -780,3 +780,5 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 .part-move button { font: inherit; cursor: pointer; width: 34px; height: 34px; border-radius: 9px; border: 2px solid var(--line); background: var(--cream); color: var(--text); }
 .part-move button:hover:not(:disabled) { border-color: var(--red); color: var(--red-sh); }
 .part-move button:disabled { opacity: .35; cursor: default; }
+.part-folder-files .part-folder { background: var(--cream); }
+.part-folder-files .part-folder .part-folder-files .part-item { background: var(--white); }
