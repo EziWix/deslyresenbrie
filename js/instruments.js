@@ -12,7 +12,7 @@ import { build } from './instruments-models.js';
    Un fichier models/<id>.glb remplace le modèle codé de l'instrument.
    view : direction de la caméra au premier affichage
    rot  : rotation [x, y, z] en degrés appliquée au modèle (facultatif) */
-const MODELS_VERSION = 2;  // à incrémenter quand on remplace un .glb
+const MODELS_VERSION = 3;  // à incrémenter quand on remplace un .glb
 const GLB = {
     'trompette':     { view: [0.3, 0.25, 1] },
     'trombone':      { view: [0.3, 0.25, 1] },
@@ -22,6 +22,12 @@ const GLB = {
     'clarinette':    { view: [0.4, 0.2, 1], rot: [0, 0, -40] },
     'hautbois':      { view: [0.4, 0.2, 1], rot: [0, 0, -40] },
     'saxophone':     { view: [0.5, 0.1, 1] },
+    'sax-tenor':     { view: [0.5, 0.1, 1] },
+    'sax-baryton':   { view: [0.5, 0.15, 1] },
+    'clarinette-basse': { view: [0.45, 0.15, 1], rot: [0, 0, -18] },
+    'euphonium':     { view: [0.55, 0.2, 1] },
+    'contrebasse':   { view: [0.45, 0.12, 1], rot: [0, 0, -14] },
+    'piano':         { view: [0.6, 0.65, 1] },
     'batterie':      { view: [0.45, 0.45, 1] },
     'timbales':      { view: [0.25, 0.6, 1] },
     'petites-percussions': { view: [0.3, 0.55, 1] },
@@ -42,6 +48,10 @@ const CATEGORIES = [
         id: 'percussions', label: 'Percussions', icon: 'fa-drum',
         intro: "Frappées, secouées ou entrechoquées : elles donnent le rythme et colorent l'orchestre."
     },
+    {
+        id: 'cordes-claviers', label: 'Cordes & claviers', icon: 'fa-guitar',
+        intro: "La contrebasse, dont on frotte ou pince les cordes, et le piano, dont les cordes sont frappées par des marteaux, complètent l'orchestre."
+    },
 ];
 
 const INSTRUMENTS = [
@@ -57,6 +67,10 @@ const INSTRUMENTS = [
       resume: "Son tube enroulé sur lui-même lui donne un son rond et doux. Le musicien garde une main dans le pavillon pour ajuster le timbre.",
       role: "Fait le lien entre les cuivres et les bois.",
       anecdote: "Déroulé, son tube dépasse 3,50 mètres." },
+    { id: 'euphonium', cat: 'cuivres', nom: "Euphonium",
+      resume: "Le ténor des cuivres graves : une sorte de petit tuba au son rond et chantant, souvent chargé des grands solos.",
+      role: "Mélodies, contre-chants et solos lyriques.",
+      anecdote: "Dans les harmonies, il joue souvent les parties que tient le violoncelle dans un orchestre symphonique." },
     { id: 'tuba', cat: 'cuivres', nom: 'Tuba',
       resume: "Le plus grave et le plus imposant des cuivres. Il pose les fondations sur lesquelles tout l'orchestre s'appuie.",
       role: "Ligne de basse et soutien rythmique.",
@@ -69,14 +83,26 @@ const INSTRUMENTS = [
       resume: "Une anche simple vibre contre le bec. Son registre très étendu va d'un grave chaleureux à un aigu brillant.",
       role: "Souvent les mélodies principales : c'est un peu le violon de l'harmonie.",
       anecdote: "Dans une harmonie, les clarinettes forment souvent le pupitre le plus nombreux." },
+    { id: 'clarinette-basse', cat: 'bois', nom: "Clarinette basse",
+      resume: "La grande sœur de la clarinette, une octave plus grave. Son bocal recourbé et son pavillon métallique tourné vers le haut la rendent reconnaissable.",
+      role: "Lignes de basse chaleureuses et soutien des bois.",
+      anecdote: "Elle est si longue qu'elle repose au sol sur une pique, comme une contrebasse." },
     { id: 'hautbois', cat: 'bois', nom: 'Hautbois',
       resume: "Son anche double, faite de deux fines lamelles de roseau, lui donne un timbre chantant et très expressif.",
       role: "Solos expressifs et couleurs délicates.",
       anecdote: "C'est le hautbois qui donne le « la » pour accorder l'orchestre symphonique." },
-    { id: 'saxophone', cat: 'bois', nom: 'Saxophone',
-      resume: "Inventé par le Belge Adolphe Sax dans les années 1840, il marie un corps en laiton et l'anche d'une clarinette.",
+    { id: 'saxophone', cat: 'bois', nom: 'Saxophone alto',
+      resume: "Le plus courant des saxophones. Inventé par le Belge Adolphe Sax dans les années 1840, il marie un corps en laiton et l'anche d'une clarinette.",
       role: "Contre-chants, mélodies, et une touche de jazz.",
       anecdote: "Malgré son corps en métal, c'est un bois : son son vient de son anche." },
+    { id: 'sax-tenor', cat: 'bois', nom: "Saxophone ténor",
+      resume: "Plus grand et plus grave que l'alto, avec un bocal recourbé caractéristique. Son timbre chaud a fait sa réputation dans le jazz.",
+      role: "Contre-chants et mélodies dans le médium grave.",
+      anecdote: "On le reconnaît à la bosse de son bocal, qui le distingue de l'alto au premier coup d'œil." },
+    { id: 'sax-baryton', cat: 'bois', nom: "Saxophone baryton",
+      resume: "Le géant de la famille : son tube est si long qu'il fait une boucle au-dessus du corps. Il donne une assise grave et puissante.",
+      role: "Ligne de basse des saxophones.",
+      anecdote: "Il est si lourd que le musicien le porte avec un harnais ou le pose sur un support." },
     { id: 'batterie', cat: 'percussions', nom: 'Batterie',
       resume: "Plusieurs instruments joués par un seul musicien : grosse caisse au pied, caisse claire, toms, charleston et cymbales.",
       role: "Le moteur rythmique : elle donne le tempo et l'énergie à tout l'orchestre.",
@@ -93,6 +119,14 @@ const INSTRUMENTS = [
       resume: "Des lames de bois accordées, frappées avec des maillets. Les tubes placés dessous amplifient le son.",
       role: "Mélodies sautillantes et couleurs brillantes.",
       anecdote: "Plus la lame est courte, plus la note est aiguë." },
+    { id: 'contrebasse', cat: 'cordes-claviers', nom: "Contrebasse",
+      resume: "La plus grande et la plus grave des cordes frottées. On en joue debout ou assis sur un haut tabouret, à l'archet ou en pinçant les cordes.",
+      role: "Assise grave de l'orchestre, souvent aux côtés des tubas.",
+      anecdote: "Elle mesure près de 1,80 mètre : plus grande que beaucoup de ses musiciens !" },
+    { id: 'piano', cat: 'cordes-claviers', nom: "Piano",
+      resume: "Quand on enfonce une touche, un marteau feutré frappe les cordes. Avec ses 88 touches, il couvre presque toute l'étendue de l'orchestre.",
+      role: "Harmonies, accompagnement et effets.",
+      anecdote: "Un piano à queue contient plus de 200 cordes tendues : leur tension totale atteint une vingtaine de tonnes." },
 ];
 
 const byId = Object.fromEntries(INSTRUMENTS.map(i => [i.id, i]));
