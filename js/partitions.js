@@ -161,7 +161,7 @@ window.DLBPartitions = (() => {
     }
 
     /* ---------- ordre des morceaux (premier niveau) : <formation>/_ordre.json ---------- */
-    // Format : ["morceau", …] (ancien) ou { ordre: [...], categories: [{ nom, dossiers: [...] }] }
+    // Format : ["morceau", …] (ancien) ou { ordre: [...], categories: [{ nom, dossiers: [...], fichiers: [...] }] }
     async function readOrder(f) {
         const none = { names: [], cats: [], sha: null };
         try {
@@ -171,7 +171,7 @@ window.DLBPartitions = (() => {
             if (Array.isArray(data)) return { names: data, cats: [], sha: meta.sha };
             const cats = (Array.isArray(data.categories) ? data.categories : [])
                 .filter(c => c && typeof c.nom === 'string' && c.nom.trim())
-                .map(c => ({ name: c.nom, dirs: Array.isArray(c.dossiers) ? c.dossiers : [] }));
+                .map(c => ({ name: c.nom, dirs: (Array.isArray(c.dossiers) ? c.dossiers : []).concat(Array.isArray(c.fichiers) ? c.fichiers : []) }));
             return { names: Array.isArray(data.ordre) ? data.ordre : [], cats, sha: meta.sha };
         } catch {
             return none;
@@ -185,6 +185,7 @@ window.DLBPartitions = (() => {
         const categories = (box._cats || []).map(c => ({
             nom: c.name,
             dossiers: box._tree.dirs.filter(d => catOf(box, d) === c.name).map(d => fix(d.name)),
+            fichiers: box._tree.files.filter(x => catOf(box, x) === c.name).map(x => fix(x.name)),
         }));
         return JSON.stringify(categories.length ? { ordre: names, categories } : names, null, 1);
     }
@@ -306,8 +307,7 @@ window.DLBPartitions = (() => {
     // Petit menu « Ranger dans… » sous le bouton d'un dossier
     function openCatMenu(box, btn) {
         closeCatMenus();
-        const det = btn.closest('.part-folder');
-        const d = box._tree.dirs.find(x => x.path === det.dataset.dir);
+        const d = rootEntry(box, btn);
         if (!d) return;
         const cur = catOf(box, d);
         const opts = [{ name: '', label: 'Sans catégorie' }].concat((box._cats || []).map(c => ({ name: c.name, label: c.name })));
@@ -318,6 +318,13 @@ window.DLBPartitions = (() => {
                 <i class="fas ${o.name ? 'fa-layer-group' : 'fa-inbox'}"></i> ${esc(o.label)}${o.name === cur ? ' <i class="fas fa-check"></i>' : ''}</button>`).join('');
         btn.parentElement.appendChild(menu);
         setTimeout(() => document.addEventListener('click', closeCatMenus, { once: true }), 0);
+    }
+    // Morceau (dossier) ou PDF de premier niveau concerné par un bouton
+    function rootEntry(box, btn) {
+        const item = btn.closest('.part-item');
+        if (item) return box._tree.files.find(x => x.path === item.dataset.path);
+        const det = btn.closest('.part-folder');
+        return det && box._tree.dirs.find(x => x.path === det.dataset.dir);
     }
     function closeCatMenus() { document.querySelectorAll('.part-catmenu').forEach(m => m.remove()); }
 
@@ -343,14 +350,16 @@ window.DLBPartitions = (() => {
     }
 
     /* ---------- affichage ---------- */
-    function fileHTML(it) {
+    function fileHTML(it, top) {
+        const sortable = top && top.sortable;
         return `
-            <div class="part-item" data-path="${esc(it.path)}" data-sha="${esc(it.sha)}" data-name="${esc(it.name)}">
+            <div class="part-item${sortable ? ' sortable' : ''}"${sortable ? ' draggable="true"' : ''} data-path="${esc(it.path)}" data-sha="${esc(it.sha)}" data-name="${esc(it.name)}">
                 <i class="fas fa-file-pdf part-icon"></i>
                 <div class="part-meta"><strong>${esc(titleOf(it.name))}</strong><small>${sizeLabel(it.size)}</small></div>
                 <div class="part-actions">
                     <button type="button" data-act="open" title="Ouvrir"><i class="fas fa-eye"></i><span> Ouvrir</span></button>
                     <button type="button" data-act="dl" title="Télécharger"><i class="fas fa-download"></i></button>
+                    ${write && top && top.hasCats ? '<span class="part-catwrap"><button type="button" data-act="catmenu" title="Ranger dans une catégorie"><i class="fas fa-folder-tree"></i></button></span>' : ''}
                     ${write ? '<button type="button" data-act="rename" title="Renommer"><i class="fas fa-pen"></i></button>' : ''}
                     ${write ? '<button type="button" data-act="del" class="part-del" title="Supprimer"><i class="fas fa-trash"></i></button>' : ''}
                 </div>
@@ -377,7 +386,7 @@ window.DLBPartitions = (() => {
                 </summary>
                 <div class="part-folder-files">
                     ${shown.folders.map(c => folderHTML(c.node, c, q, openSet, null)).join('')}
-                    ${shown.files.map(fileHTML).join('')}
+                    ${shown.files.map(x => fileHTML(x)).join('')}
                 </div>
             </details>`;
     }
@@ -415,17 +424,20 @@ window.DLBPartitions = (() => {
         const hint = txt => (write && !q ? `<p class="part-cat-empty"><i class="fas fa-hand-pointer"></i> ${txt}</p>` : '');
 
         const loose = group('');
-        let html = `<div class="part-cat-body part-loose" data-cat="">${folders(loose) || (cats.length ? hint('Morceaux sans catégorie : glissez un dossier ici pour le sortir de sa catégorie.') : '')}</div>`;
+        const fgroup = cat => files.filter(x => catOf(box, x) === cat);
+        const pdfs = arr => arr.map(x => fileHTML(x, { sortable, hasCats: cats.length > 0 })).join('');
+        const looseHTML = folders(loose) + pdfs(fgroup(''));
+        let html = `<div class="part-cat-body part-loose" data-cat="">${looseHTML || (cats.length ? hint('Sans catégorie : glissez ici un dossier ou un PDF pour le sortir de sa catégorie.') : '')}</div>`;
         cats.forEach((c, ci) => {
-            const g = group(c.name);
-            if (!g.length && (q || !write)) return;  // catégorie vide : visible seulement des éditeurs
+            const g = group(c.name), gf = fgroup(c.name);
+            if (!g.length && !gf.length && (q || !write)) return;  // catégorie vide : visible seulement des éditeurs
             const isOpen = !!q || !closed.has(c.name);
             html += `
                 <section class="part-cat${isOpen ? ' open' : ''}" data-cat="${esc(c.name)}">
                     <div class="part-cat-head" title="Ouvrir / fermer">
                         <i class="fas fa-chevron-right part-cat-chev"></i>
                         <i class="fas fa-layer-group part-cat-icon"></i>
-                        <span class="part-cat-title"><strong class="part-cat-name">${esc(c.name)}</strong><small>${plural(g.length, 'morceau').replace('morceaus', 'morceaux')}</small></span>
+                        <span class="part-cat-title"><strong class="part-cat-name">${esc(c.name)}</strong><small>${[g.length || !gf.length ? plural(g.length, 'morceau').replace('morceaus', 'morceaux') : '', gf.length ? plural(gf.length, 'partition') : ''].filter(Boolean).join(' · ')}</small></span>
                         ${write ? `<span class="part-move">
                             <button type="button" data-act="catup" title="Monter la catégorie"${ci === 0 ? ' disabled' : ''}><i class="fas fa-arrow-up"></i></button>
                             <button type="button" data-act="catdown" title="Descendre la catégorie"${ci === cats.length - 1 ? ' disabled' : ''}><i class="fas fa-arrow-down"></i></button>
@@ -433,10 +445,10 @@ window.DLBPartitions = (() => {
                         <button type="button" data-act="catrename" class="part-ren" title="Renommer la catégorie"><i class="fas fa-pen"></i></button>
                         <button type="button" data-act="catdel" class="part-del part-deldir" title="Supprimer la catégorie (les dossiers sont gardés)"><i class="fas fa-trash"></i></button>` : ''}
                     </div>
-                    <div class="part-cat-body" data-cat="${esc(c.name)}">${folders(g) || hint('Catégorie vide : glissez un dossier ici, ou utilisez le bouton <i class="fas fa-folder-tree"></i> d\'un dossier.')}</div>
+                    <div class="part-cat-body" data-cat="${esc(c.name)}">${folders(g) + pdfs(gf) || hint('Catégorie vide : glissez ici un dossier ou un PDF, ou utilisez son bouton <i class="fas fa-folder-tree"></i>.')}</div>
                 </section>`;
         });
-        list.innerHTML = html + files.map(fileHTML).join('');
+        list.innerHTML = html;
         list.querySelectorAll('.part-folder').forEach(det => det.addEventListener('toggle', e => {
             e.stopPropagation();
             box._open = box._open || new Set();
@@ -448,14 +460,15 @@ window.DLBPartitions = (() => {
     // Glisser-déposer des morceaux de premier niveau (éditeurs) : ordre + changement de catégorie
     function enableDrag(box, list) {
         let dragged = null;
-        const snapshot = () => box._tree.dirs.map(d => d.path + '>' + catOf(box, d)).join('|');
+        const snapshot = () => box._tree.dirs.concat(box._tree.files).map(d => d.path + '>' + catOf(box, d)).join('|');
 
         function commit() {
             const before = snapshot();
             const paths = [];
-            list.querySelectorAll('.part-cat-body').forEach(body => body.querySelectorAll(':scope > .part-folder').forEach(det => {
-                paths.push(det.dataset.dir);
-                const d = box._tree.dirs.find(x => x.path === det.dataset.dir);
+            list.querySelectorAll('.part-cat-body').forEach(body => body.querySelectorAll(':scope > .part-folder, :scope > .part-item').forEach(det => {
+                const isFile = det.classList.contains('part-item');
+                if (!isFile) paths.push(det.dataset.dir);
+                const d = isFile ? box._tree.files.find(x => x.path === det.dataset.path) : box._tree.dirs.find(x => x.path === det.dataset.dir);
                 if (!d) return;
                 if (body.dataset.cat) box._assign.set(d.name, body.dataset.cat); else box._assign.delete(d.name);
             }));
@@ -465,13 +478,13 @@ window.DLBPartitions = (() => {
             if (snapshot() !== before) saveOrderSoon(box);
         }
 
-        list.querySelectorAll('.part-cat-body > .part-folder.sortable').forEach(det => {
+        list.querySelectorAll('.part-cat-body > .part-folder.sortable, .part-cat-body > .part-item.sortable').forEach(det => {
             det.addEventListener('dragstart', e => {
                 if (e.target !== det) return;
                 dragged = det;
                 det.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', det.dataset.dir);
+                e.dataTransfer.setData('text/plain', det.dataset.dir || det.dataset.path);
             });
             det.addEventListener('dragend', () => {
                 det.classList.remove('dragging');
@@ -583,6 +596,9 @@ window.DLBPartitions = (() => {
                 return;
             }
             moves = [{ from: path, to, sha }];
+            if (dir === f && box._assign && box._assign.has(name)) {  // PDF rangé dans une catégorie : il y reste
+                extra = [{ path: `${f}/${ORDER_FILE}`, content: orderJSON(box, { from: name, to: newName }) }];
+            }
             label = `« ${titleOf(name)} » renommée en « ${titleOf(newName)} ».`;
         }
         if (!moves.length) { render(box); return; }
@@ -614,7 +630,7 @@ window.DLBPartitions = (() => {
         // Catégories
         if (act === 'catmenu') { openCatMenu(box, btn); return; }
         if (act === 'setcat') {
-            const d = box._tree.dirs.find(x => x.path === btn.closest('.part-folder').dataset.dir);
+            const d = rootEntry(box, btn);
             closeCatMenus();
             if (!d) return;
             const cat = btn.dataset.cat;
@@ -622,7 +638,7 @@ window.DLBPartitions = (() => {
             if (cat) box._assign.set(d.name, cat); else box._assign.delete(d.name);
             if (cat && box._catClosed) box._catClosed.delete(cat);
             render(box);
-            saveOrderSoon(box, cat ? `« ${d.name} » rangé dans « ${cat} ».` : `« ${d.name} » sorti de sa catégorie.`);
+            saveOrderSoon(box, cat ? `« ${titleOf(d.name)} » rangé dans « ${cat} ».` : `« ${titleOf(d.name)} » sorti de sa catégorie.`);
             return;
         }
         if (act.startsWith('cat')) {

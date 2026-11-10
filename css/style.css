@@ -775,7 +775,9 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 .part-pick i { font-size: 1em; color: inherit; }
 .part-grip { color: var(--muted); cursor: grab; padding: 4px 2px; font-size: 1rem; }
 .part-folder.sortable[draggable="true"]:active .part-grip { cursor: grabbing; }
-.part-folder.dragging { opacity: .45; border-style: dashed; border-color: var(--red); }
+.part-folder.dragging, .part-item.dragging { opacity: .45; border-style: dashed; border-color: var(--red); }
+.part-item.sortable { cursor: grab; }
+.part-item.sortable:active { cursor: grabbing; }
 .part-ren { font: inherit; cursor: pointer; width: 34px; height: 34px; border-radius: 9px; border: 2px solid var(--line); background: var(--cream); color: var(--text); flex-shrink: 0; }
 .part-ren:hover, .part-actions button[data-act="rename"]:hover { border-color: var(--red); color: var(--red-sh); }
 .part-rename { font: inherit; width: 100%; max-width: 420px; padding: 4px 8px; border: 2px solid var(--red); border-radius: 8px; background: #fff; color: var(--text); }
