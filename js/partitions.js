@@ -57,6 +57,46 @@ window.DLBPartitions = (() => {
         return raw ? res.blob() : res.json();
     }
 
+    // API « git » bas niveau (renommage = déplacer des fichiers sans les renvoyer)
+    async function ghGit(path, { method = 'GET', body, cred = write } = {}) {
+        const res = await fetch(`${API}/repos/${cred.depot}/git/${path}`, {
+            method, cache: 'no-store', headers: headers(cred, false, body),
+            body: body ? JSON.stringify(body) : undefined,
+        });
+        if (!res.ok) throw new Error(`GitHub ${res.status}`);
+        return res.json();
+    }
+
+    let branchName = null;
+    async function branch() {
+        if (!branchName) {
+            const res = await fetch(`${API}/repos/${write.depot}`, { cache: 'no-store', headers: headers(write) });
+            branchName = res.ok ? (await res.json()).default_branch || 'main' : 'main';
+        }
+        return branchName;
+    }
+
+    // Déplace des fichiers (from -> to) en un seul commit ; extra = fichiers à écrire en plus (ex. l'ordre)
+    async function movePaths(moves, message, extra = []) {
+        const b = await branch();
+        for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+                const head = (await ghGit(`ref/heads/${b}`)).object.sha;
+                const baseTree = (await ghGit(`commits/${head}`)).tree.sha;
+                const entries = moves.flatMap(m => [
+                    { path: m.to, mode: '100644', type: 'blob', sha: m.sha },
+                    { path: m.from, mode: '100644', type: 'blob', sha: null },
+                ]).concat(extra.map(x => ({ path: x.path, mode: '100644', type: 'blob', content: x.content })));
+                const tree = await ghGit('trees', { method: 'POST', body: { base_tree: baseTree, tree: entries } });
+                const commit = await ghGit('commits', { method: 'POST', body: { message, tree: tree.sha, parents: [head] } });
+                await ghGit(`refs/heads/${b}`, { method: 'PATCH', body: { sha: commit.sha } });
+                return;
+            } catch (e) {
+                if (attempt === 1) throw e;  // une 2e tentative si quelqu'un a modifié le dépôt entre-temps
+            }
+        }
+    }
+
     // Toute l'arborescence du dépôt en une seule requête
     async function ghTree() {
         const res = await fetch(`${API}/repos/${read.depot}/git/trees/HEAD?recursive=1`, { cache: 'no-store', headers: headers(read) });
@@ -197,6 +237,7 @@ window.DLBPartitions = (() => {
                 <div class="part-actions">
                     <button type="button" data-act="open" title="Ouvrir"><i class="fas fa-eye"></i><span> Ouvrir</span></button>
                     <button type="button" data-act="dl" title="Télécharger"><i class="fas fa-download"></i></button>
+                    ${write ? '<button type="button" data-act="rename" title="Renommer"><i class="fas fa-pen"></i></button>' : ''}
                     ${write ? '<button type="button" data-act="del" class="part-del" title="Supprimer"><i class="fas fa-trash"></i></button>' : ''}
                 </div>
             </div>`;
@@ -215,6 +256,7 @@ window.DLBPartitions = (() => {
                         <button type="button" data-act="up" title="Monter"${top.index === 0 ? ' disabled' : ''}><i class="fas fa-arrow-up"></i></button>
                         <button type="button" data-act="down" title="Descendre"${top.index === top.total - 1 ? ' disabled' : ''}><i class="fas fa-arrow-down"></i></button>
                     </span>` : ''}
+                    ${write ? `<button type="button" data-act="rename" class="part-ren" title="Renommer le dossier"><i class="fas fa-pen"></i></button>` : ''}
                     ${write ? `<button type="button" data-act="deldir" class="part-del part-deldir" title="Supprimer tout le dossier"><i class="fas fa-trash"></i></button>` : ''}
                     <i class="fas fa-chevron-down part-chevron"></i>
                 </summary>
@@ -301,8 +343,97 @@ window.DLBPartitions = (() => {
         return false;
     }
 
+    /* ---------- renommer (fichier ou dossier) ---------- */
+    function startRename(box, btn) {
+        const folder = btn.closest('.part-item') ? null : btn.closest('.part-folder');
+        const holder = folder ? folder.querySelector(':scope > summary .part-meta strong') : btn.closest('.part-item').querySelector('.part-meta strong');
+        if (!holder || holder.querySelector('input')) return;
+        const current = folder ? findNode(box._tree.root, folder.dataset.dir)?.name : btn.closest('.part-item').dataset.name.replace(/\.pdf$/i, '');
+        if (current == null) return;
+        if (folder) folder.draggable = false;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'part-rename';
+        input.value = current;
+        input.setAttribute('aria-label', 'Nouveau nom');
+        holder.replaceChildren(input);
+        input.focus();
+        input.select();
+
+        let done = false;
+        const finish = commit => {
+            if (done) return;
+            done = true;
+            const value = safeName(input.value);
+            if (!commit || !value || value === current) { render(box); return; }
+            doRename(box, folder, btn.closest('.part-item'), value);
+        };
+        input.addEventListener('keydown', e => {
+            e.stopPropagation();
+            if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+            else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+        });
+        input.addEventListener('keyup', e => { e.stopPropagation(); if (e.key === ' ') e.preventDefault(); });  // espace : ne pas replier le dossier
+        input.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
+        input.addEventListener('blur', () => finish(true));
+    }
+
+    async function doRename(box, folder, item, value) {
+        const f = box.dataset.formation;
+        let moves, label, extra = [], oldDir = null, newDir = null;
+
+        if (folder) {
+            const node = findNode(box._tree.root, folder.dataset.dir);
+            if (!node) return;
+            const parentPath = node.path.slice(0, node.path.lastIndexOf('/'));
+            const parent = findNode(box._tree.root, parentPath) || box._tree.root;
+            if (parent.folders.some(d => d !== node && d.name.toLowerCase() === value.toLowerCase())) {
+                status(box, 'err', `Un dossier « ${value} » existe déjà ici.`);
+                render(box);
+                return;
+            }
+            oldDir = node.path;
+            newDir = `${parentPath}/${value}`;
+            moves = filesOf(node).map(it => ({ from: it.path, to: newDir + it.path.slice(oldDir.length), sha: it.sha }));
+            label = `Dossier « ${node.name} » renommé en « ${value} ».`;
+            if (parentPath === f) {  // morceau de premier niveau : garder sa place dans l'ordre
+                const names = box._tree.dirs.map(d => d === node ? value : d.name);
+                extra = [{ path: `${f}/${ORDER_FILE}`, content: JSON.stringify(names, null, 1) }];
+            }
+        } else {
+            const { path, sha, name } = item.dataset;
+            const dir = path.slice(0, path.lastIndexOf('/'));
+            const newName = /\.pdf$/i.test(value) ? value : value + '.pdf';
+            const to = `${dir}/${newName}`;
+            if (allFiles(box).some(x => x.path !== path && x.path.toLowerCase() === to.toLowerCase())) {
+                status(box, 'err', `Une partition « ${titleOf(newName)} » existe déjà ici.`);
+                render(box);
+                return;
+            }
+            moves = [{ from: path, to, sha }];
+            label = `« ${titleOf(name)} » renommée en « ${titleOf(newName)} ».`;
+        }
+        if (!moves.length) { render(box); return; }
+
+        status(box, 'ok', 'Renommage en cours…');
+        try {
+            await movePaths(moves, `Renommage : ${moves.length === 1 ? moves[0].from + ' -> ' + moves[0].to : oldDir + ' -> ' + newDir}`, extra);
+            if (oldDir && box._open) {  // garder ouverts les dossiers qui l'étaient
+                box._open = new Set([...box._open].map(p => p === oldDir || p.startsWith(oldDir + '/') ? newDir + p.slice(oldDir.length) : p));
+            }
+            status(box, 'ok', label);
+        } catch (e) {
+            console.warn('Renommage', e);
+            status(box, 'err', 'Le renommage a échoué. Rechargez la page et réessayez.');
+        }
+        load(box);
+    }
+
     async function onAction(box, btn) {
         const act = btn.dataset.act;
+
+        if (act === 'rename') { startRename(box, btn); return; }
 
         if (act === 'up' || act === 'down') {
             const path = btn.closest('.part-folder').dataset.dir;
@@ -579,7 +710,7 @@ window.DLBPartitions = (() => {
             box.querySelector('.part-list').addEventListener('click', e => {
                 const btn = e.target.closest('button[data-act]');
                 if (!btn) return;
-                if (['deldir', 'up', 'down'].includes(btn.dataset.act)) e.preventDefault();  // ne pas replier le dossier
+                if (['deldir', 'up', 'down', 'rename'].includes(btn.dataset.act)) e.preventDefault();  // ne pas replier le dossier
                 onAction(box, btn);
             });
         });
