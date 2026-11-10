@@ -12,7 +12,7 @@ import { build } from './instruments-models.js';
    Un fichier models/<id>.glb remplace le modèle codé de l'instrument.
    view : direction de la caméra au premier affichage
    rot  : rotation [x, y, z] en degrés appliquée au modèle (facultatif) */
-const MODELS_VERSION = 3;  // à incrémenter quand on remplace un .glb
+const MODELS_VERSION = 4;  // à incrémenter quand on remplace un .glb
 const GLB = {
     'trompette':     { view: [0.3, 0.25, 1] },
     'trombone':      { view: [0.3, 0.25, 1] },
@@ -28,6 +28,7 @@ const GLB = {
     'euphonium':     { view: [0.55, 0.2, 1] },
     'contrebasse':   { view: [0.45, 0.12, 1], rot: [0, 0, -14] },
     'piano':         { view: [0.6, 0.65, 1] },
+    'melodica':      { view: [0.25, 0.75, 1] },
     'batterie':      { view: [0.45, 0.45, 1] },
     'timbales':      { view: [0.25, 0.6, 1] },
     'petites-percussions': { view: [0.3, 0.55, 1] },
@@ -50,7 +51,7 @@ const CATEGORIES = [
     },
     {
         id: 'cordes-claviers', label: 'Cordes & claviers', icon: 'fa-guitar',
-        intro: "La contrebasse, dont on frotte ou pince les cordes, et le piano, dont les cordes sont frappées par des marteaux, complètent l'orchestre."
+        intro: "La contrebasse, dont on frotte ou pince les cordes, le piano, dont les cordes sont frappées par des marteaux, et le mélodica, un petit clavier dans lequel on souffle, complètent l'orchestre."
     },
 ];
 
@@ -127,6 +128,10 @@ const INSTRUMENTS = [
       resume: "Quand on enfonce une touche, un marteau feutré frappe les cordes. Avec ses 88 touches, il couvre presque toute l'étendue de l'orchestre.",
       role: "Harmonies, accompagnement et effets.",
       anecdote: "Un piano à queue contient plus de 200 cordes tendues : leur tension totale atteint une vingtaine de tonnes." },
+    { id: 'melodica', cat: 'cordes-claviers', nom: "Mélodica",
+      resume: "Un petit clavier dans lequel on souffle : chaque touche ouvre le passage de l'air vers une anche métallique, comme dans un harmonica.",
+      role: "Mélodies et accords, facile à emporter en défilé comme en concert.",
+      anecdote: "C'est à la fois un instrument à vent et un instrument à clavier : les doigts choisissent les notes, le souffle les fait sonner." },
 ];
 
 const byId = Object.fromEntries(INSTRUMENTS.map(i => [i.id, i]));

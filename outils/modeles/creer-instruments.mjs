@@ -1,7 +1,7 @@
 /* =========================================================
    Crée par code les modèles 3D (models/*.glb) de :
    clarinette basse, saxophone ténor, saxophone baryton,
-   euphonium, contrebasse, piano à queue.
+   euphonium, contrebasse, piano à queue, mélodica.
 
    Matières reprises des modèles existants (Laiton poli, Maillechort
    argenté, Ébène, Nacre…) pour un rendu cohérent sur le site.
@@ -387,6 +387,50 @@ function piano() {
     return g;
 }
 
+
+/* =========================================================
+   MÉLODICA (32 touches, de Fa à Do), posé à plat, embouchure à gauche
+   ========================================================= */
+function melodica() {
+    const g = new THREE.Group();
+    const L = 0.47, Dp = 0.11, Hb = 0.035;
+
+    // corps en plastique : rectangle aux coins arrondis, extrudé vers le haut
+    const s = new THREE.Shape(), r = 0.03, x0 = -L / 2, z0 = 0;
+    s.moveTo(x0 + r, z0); s.lineTo(x0 + L - r, z0); s.quadraticCurveTo(x0 + L, z0, x0 + L, z0 + r);
+    s.lineTo(x0 + L, z0 + Dp - r); s.quadraticCurveTo(x0 + L, z0 + Dp, x0 + L - r, z0 + Dp);
+    s.lineTo(x0 + r, z0 + Dp); s.quadraticCurveTo(x0, z0 + Dp, x0, z0 + Dp - r);
+    s.lineTo(x0, z0 + r); s.quadraticCurveTo(x0, z0, x0 + r, z0);
+    const geo = new THREE.ExtrudeGeometry(s, { depth: Hb, bevelEnabled: true, bevelThickness: 0.008, bevelSize: 0.008, bevelSegments: 3, curveSegments: 10 });
+    geo.rotateX(-Math.PI / 2);  // le dessin devient horizontal, l'épaisseur monte en Y
+    geo.translate(0, 0.008, Dp / 2);  // centré en profondeur, posé sur y = 0
+    g.add(mesh(geo, M.redPlastic));
+
+    // clavier : 19 blanches, 13 noires
+    const top = Hb + 0.016, kW = 0.38 / 19, kx0 = -0.38 / 2 + 0.03;
+    const names = ['F', 'G', 'A', 'B', 'C', 'D', 'E'];
+    for (let i = 0; i < 19; i++) {
+        const x = kx0 + kW * (i + 0.5);
+        g.add(at(box(kW * 0.9, 0.008, 0.072, M.ivory), x, top, 0.012));
+        const n = names[i % 7];
+        if (i < 18 && !['B', 'E'].includes(n)) g.add(at(box(kW * 0.55, 0.008, 0.044, M.ebony), x + kW / 2, top + 0.007, -0.004));
+    }
+    // plaque de marque, bouton de purge, embout
+    g.add(at(box(0.07, 0.012, 0.002, M.chrome), 0.05, Hb / 2 + 0.008, Dp / 2 + 0.0085));
+    g.add(at(cyl(0.006, 0.006, 0.006, M.chrome, 14), L / 2 - 0.035, top - 0.004, -0.035));
+    const sock = cyl(0.009, 0.009, 0.018, M.chrome, 16);
+    sock.rotation.z = Math.PI / 2;
+    g.add(at(sock, -L / 2 - 0.012, Hb / 2 + 0.008, 0));
+
+    // tuyau souple et embouchure
+    const hose = curveOf([V(-L / 2 - 0.02, Hb / 2 + 0.008, 0), V(-L / 2 - 0.08, 0.02, 0.03), V(-L / 2 - 0.1, 0.012, 0.12),
+        V(-L / 2 - 0.02, 0.012, 0.17), V(-L / 2 + 0.07, 0.014, 0.15)]);
+    g.add(taperedTube(hose, () => 0.0075, M.whitePlastic, 90, 14));
+    const hEnd = hose.getPointAt(1), hDir = hose.getTangentAt(1);
+    g.add(place(cyl(0.006, 0.01, 0.045, M.whitePlastic, 16), hEnd.clone().addScaledVector(hDir, 0.022), hDir));
+    return g;
+}
+
 /* =========================================================
    Export
    ========================================================= */
@@ -411,6 +455,8 @@ Object.assign(M, {
     black: newMat('Laque noire', [0.012, 0.012, 0.014], 0.3, 0.12),
     gold: newMat('Fonte doree', [0.42, 0.24, 0.05], 0.95, 0.42),
     ivory: newMat('Ivoire', [0.86, 0.84, 0.78], 0, 0.32),
+    redPlastic: newMat('Plastique rouge', [0.6, 0.012, 0.02], 0, 0.34),
+    whitePlastic: newMat('Plastique blanc', [0.8, 0.8, 0.78], 0, 0.45),
 });
 const missing = Object.entries(M).filter(([, v]) => !v).map(([k]) => k);
 if (missing.length) throw new Error('Matières introuvables : ' + missing.join(', '));
@@ -422,6 +468,7 @@ const ALL = {
     'euphonium': euphonium,
     'contrebasse': contrebasse,
     'piano': piano,
+    'melodica': melodica,
 };
 const wanted = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(ALL);
 for (const id of wanted) await exportGlb(ALL[id](), `${id}.glb`);
