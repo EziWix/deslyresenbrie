@@ -55,6 +55,9 @@
         content.querySelectorAll('.members-alert').forEach(a => {
             if (!a.querySelector('li')) a.remove();
         });
+
+        // Partitions (liste + dépôt éditeur) : voir js/partitions.js
+        window.DLBPartitions?.init(content);
     }
 
     // Déjà connecté pendant cette session : la clé est gardée jusqu'à la fermeture de l'onglet
@@ -93,7 +96,7 @@
     });
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
-        try { sessionStorage.removeItem(STORE); } catch { /* rien */ }
+        try { sessionStorage.removeItem(STORE); sessionStorage.removeItem('dlb_editeur_cle'); } catch { /* rien */ }
         location.reload();
     });
 })();

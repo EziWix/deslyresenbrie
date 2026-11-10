@@ -714,3 +714,62 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
     .marquee-label { display: none; }
     .logo-text { font-size: 1rem; }
 }
+
+/* ---------- Partitions (espace membres) ---------- */
+.editor-bar {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    max-width: 900px; margin: 0 auto 26px; padding: 14px 18px; border-radius: 14px;
+    background: var(--white); border: 2px dashed var(--line); color: var(--muted); font-size: .92rem;
+}
+.editor-bar i { color: var(--red); }
+.editor-bar.on { border-style: solid; border-color: rgba(227, 19, 31, .45); background: #fff3f2; color: var(--text); }
+.editor-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.editor-form input { font: inherit; padding: 9px 12px; border: 2px solid var(--line); border-radius: 10px; background: var(--cream); min-width: 190px; }
+.editor-form input:focus { outline: none; border-color: var(--red); background: var(--white); }
+.editor-form .btn, .editor-bar .btn { padding: 9px 16px; font-size: .86rem; }
+.editor-error { width: 100%; color: var(--red-sh); font-weight: 600; }
+.part-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.part-searchwrap { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px; max-width: 360px; padding: 0 12px; border: 2px solid var(--line); border-radius: 10px; background: var(--cream); }
+.part-searchwrap i { color: var(--muted); }
+.part-search { font: inherit; border: none; background: none; padding: 9px 0; width: 100%; outline: none; }
+.part-count { font-size: .84rem; font-weight: 700; color: var(--muted); }
+.part-drop {
+    display: grid; justify-items: center; gap: 4px; text-align: center; cursor: pointer; margin-bottom: 14px;
+    padding: 26px 18px; border: 2px dashed rgba(227, 19, 31, .45); border-radius: 14px; background: #fff7f6;
+    transition: background .2s, border-color .2s, transform .2s var(--ease);
+}
+.part-drop i { font-size: 2rem; color: var(--red); }
+.part-drop span { font-size: .84rem; color: var(--muted); }
+.part-drop:hover, .part-drop:focus-visible { background: #ffeeed; outline: none; }
+.part-drop.over { background: #ffe1df; border-color: var(--red); transform: scale(1.01); }
+.part-status { margin-bottom: 12px; }
+.part-list { display: grid; gap: 8px; }
+.part-item { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 2px solid var(--line); border-radius: 12px; background: var(--white); transition: border-color .2s; }
+.part-item:hover { border-color: rgba(227, 19, 31, .4); }
+.part-icon { font-size: 1.5rem; color: var(--red); }
+.part-meta { flex: 1; min-width: 0; }
+.part-meta strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.part-meta small { color: var(--muted); }
+.part-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.part-actions button {
+    font: 600 .84rem var(--font-body); cursor: pointer; padding: 8px 12px; border-radius: 10px;
+    border: 2px solid var(--line); background: var(--cream); color: var(--text); transition: background .2s, border-color .2s, color .2s;
+}
+.part-actions button:hover { border-color: var(--red); color: var(--red-sh); }
+.part-actions button:disabled { opacity: .5; cursor: wait; }
+.part-actions .part-del:hover, .part-actions .part-del[data-confirm="1"] { background: var(--red); border-color: var(--red); color: var(--white); }
+@media (max-width: 600px) { .part-actions span { display: none; } .editor-form input { min-width: 0; flex: 1; } }
+.part-pick { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+.part-pick .btn { padding: 8px 14px; font-size: .84rem; }
+.part-folder { border: 2px solid var(--line); border-radius: 12px; background: var(--white); transition: border-color .2s; }
+.part-folder[open] { border-color: rgba(227, 19, 31, .4); }
+.part-folder > summary { display: flex; align-items: center; gap: 14px; padding: 12px 14px; cursor: pointer; list-style: none; }
+.part-folder > summary::-webkit-details-marker { display: none; }
+.part-folder .fa-folder-open, .part-folder[open] .fa-folder { display: none; }
+.part-folder[open] .fa-folder-open { display: inline-block; }
+.part-chevron { color: var(--muted); transition: transform .3s var(--ease); }
+.part-folder[open] .part-chevron { transform: rotate(180deg); }
+.part-folder-files { display: grid; gap: 6px; padding: 0 12px 12px 34px; }
+.part-folder-files .part-item { background: var(--cream); }
+.part-deldir { font: 600 .84rem var(--font-body); cursor: pointer; padding: 8px 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--cream); color: var(--text); }
+.part-pick i { font-size: 1em; color: inherit; }

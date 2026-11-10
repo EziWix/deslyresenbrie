@@ -1,0 +1,2 @@
+/* Accès éditeur chiffré : généré par outils/chiffrer-membres.mjs --editeur, ne pas modifier à la main. */
+const EDITEUR_DATA = {"iterations":250000,"salt":"1LJrkfvXViWHvJ+QceKTEA==","iv":"g1SL7qAf9/z3IVgS","data":"3iKRY/5vUJhLKzmfzCjIf3cGEq+L2+uaNvFj62AC2BbnFl7Jyvj1TLgC6PUyxacVv311MaNPBkLfKTj6irOLgouJjdN5b6cjoXp/Q50SgD5OfO5pUZgYio/CYUxN2CL+hPm6le21NG48iZ5X0mY5wvfCOM3Id/bmeiufr4RhiNsbN215nKSybQ0oJcn3YfzhMQ2+Ky2a//1Jy+ua06LsZ/5JXII="};
