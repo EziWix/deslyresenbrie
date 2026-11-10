@@ -554,7 +554,8 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 .members-table td { padding: 12px; border-bottom: 1px solid var(--line); }
 .members-table tbody tr { transition: background .2s; }
 .members-table tbody tr:hover { background: var(--cream); }
-.members-table tr.past td { opacity: .45; }
+.members-table tr.hl td { background: rgba(227, 19, 31, .05); }
+.members-table tr.hl strong { color: var(--red-sh); }
 .members-table em { color: var(--red-sh); font-style: normal; font-size: .88em; }
 .info-boxes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
 .info-box { background: var(--cream); border-radius: 14px; padding: 16px 18px; border: 2px solid var(--line); }

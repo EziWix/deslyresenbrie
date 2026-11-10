@@ -43,10 +43,17 @@
                 p.classList.toggle('active', p.id === 'tab-' + tab.dataset.tab));
         }));
 
-        // Lignes du planning déjà passées
-        const today = new Date().toISOString().slice(0, 10);
-        content.querySelectorAll('tr[data-date]').forEach(tr => {
-            if (tr.dataset.date < today) tr.classList.add('past');
+        // Dates passées : retirées du planning et des répétitions (date locale, pas UTC)
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        content.querySelectorAll('[data-date]').forEach(el => {
+            if (el.dataset.date < today) el.remove();
+        });
+        content.querySelectorAll('.members-table tbody').forEach(tb => {
+            if (!tb.rows.length) tb.innerHTML = '<tr><td colspan="4" class="members-empty">Aucune date à venir pour le moment.</td></tr>';
+        });
+        content.querySelectorAll('.members-alert').forEach(a => {
+            if (!a.querySelector('li')) a.remove();
         });
     }
 
