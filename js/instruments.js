@@ -12,7 +12,7 @@ import { build } from './instruments-models.js';
    Un fichier models/<id>.glb remplace le modèle codé de l'instrument.
    view : direction de la caméra au premier affichage
    rot  : rotation [x, y, z] en degrés appliquée au modèle (facultatif) */
-const MODELS_VERSION = 1;  // à incrémenter quand on remplace un .glb
+const MODELS_VERSION = 2;  // à incrémenter quand on remplace un .glb
 const GLB = {
     'trompette':     { view: [0.3, 0.25, 1] },
     'trombone':      { view: [0.3, 0.25, 1] },

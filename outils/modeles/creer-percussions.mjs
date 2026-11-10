@@ -126,10 +126,9 @@ function stick(a, b, M) {
 function batterie(snareSrc, kickSrc) {
     const kit = new THREE.Group();
 
-    // Grosse caisse : le modèle a son axe en Y, on la couche (axe Z)
+    // Grosse caisse : le modèle est déjà debout, peaux vers l'avant et l'arrière (axe Z)
     const kick = kickSrc.clone(true);
-    kick.rotation.x = Math.PI / 2;
-    kick.position.set(0, 0.345, 0);
+    kick.position.set(0, 0.335, 0);
     kit.add(kick);
     // pieds avant + pédale + batte
     [-1, 1].forEach(s => kit.add(between(V(s * 0.24, 0.18, 0.12), V(s * 0.34, 0.01, 0.24), 0.009, M.chrome)));

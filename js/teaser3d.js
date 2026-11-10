@@ -71,7 +71,7 @@ function start() {
 
     async function show(id) {
         wanted = id;
-        if (!cache.has(id)) cache.set(id, loader.loadAsync(`models/${id}.glb?v=1`).then(g => g.scene));
+        if (!cache.has(id)) cache.set(id, loader.loadAsync(`models/${id}.glb?v=2`).then(g => g.scene));
         let model;
         try { model = await cache.get(id); } catch { return; }
         if (wanted !== id) return;
