@@ -779,6 +779,28 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 .part-ren { font: inherit; cursor: pointer; width: 34px; height: 34px; border-radius: 9px; border: 2px solid var(--line); background: var(--cream); color: var(--text); flex-shrink: 0; }
 .part-ren:hover, .part-actions button[data-act="rename"]:hover { border-color: var(--red); color: var(--red-sh); }
 .part-rename { font: inherit; width: 100%; max-width: 420px; padding: 4px 8px; border: 2px solid var(--red); border-radius: 8px; background: #fff; color: var(--text); }
+.part-newcat { padding: 8px 14px; font-size: .84rem; }
+.part-cat-body { display: grid; gap: 8px; }
+.part-loose:empty { display: none; }
+.part-cat { border: 2px solid var(--line); border-radius: 14px; background: var(--cream); transition: border-color .2s, background .2s; }
+.part-cat.drop-over { border-color: var(--red); background: #ffeeed; }
+.part-cat-head { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; user-select: none; }
+.part-cat-chev { color: var(--muted); transition: transform .3s var(--ease); }
+.part-cat.open .part-cat-chev { transform: rotate(90deg); }
+.part-cat-icon { font-size: 1.3rem; color: var(--red); }
+.part-cat-title { flex: 1; min-width: 0; }
+.part-cat-title strong { display: block; font-size: 1.05rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.part-cat-title small { color: var(--muted); }
+.part-cat > .part-cat-body { padding: 0 12px 12px; }
+.part-cat:not(.open) > .part-cat-body { display: none; }
+.part-cat-empty { margin: 0; padding: 14px; border: 2px dashed var(--line); border-radius: 12px; color: var(--muted); font-size: .86rem; text-align: center; background: var(--white); }
+.part-catwrap { position: relative; display: inline-flex; }
+.part-catmenu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 20; min-width: 220px; display: grid; gap: 2px; padding: 8px; background: var(--white); border: 2px solid var(--line); border-radius: 12px; box-shadow: 0 6px 0 var(--cream-2), var(--shadow); cursor: default; }
+.part-catmenu p { margin: 2px 8px 6px; font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.part-catmenu button { font: inherit; text-align: left; cursor: pointer; padding: 8px 10px; border: none; border-radius: 8px; background: none; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.part-catmenu button:hover { background: var(--cream); color: var(--red-sh); }
+.part-catmenu button.current { font-weight: 700; }
+.part-catmenu button .fa-check { margin-left: auto; color: var(--red); }
 .part-move { display: inline-flex; gap: 4px; }
 .part-move button { font: inherit; cursor: pointer; width: 34px; height: 34px; border-radius: 9px; border: 2px solid var(--line); background: var(--cream); color: var(--text); }
 .part-move button:hover:not(:disabled) { border-color: var(--red); color: var(--red-sh); }

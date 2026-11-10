@@ -161,15 +161,38 @@ window.DLBPartitions = (() => {
     }
 
     /* ---------- ordre des morceaux (premier niveau) : <formation>/_ordre.json ---------- */
+    // Format : ["morceau", …] (ancien) ou { ordre: [...], categories: [{ nom, dossiers: [...] }] }
     async function readOrder(f) {
+        const none = { names: [], cats: [], sha: null };
         try {
             const meta = await gh(`${f}/${ORDER_FILE}`);
-            if (!meta || !meta.content) return { names: [], sha: null };
-            const names = JSON.parse(b64ToUtf8(meta.content));
-            return { names: Array.isArray(names) ? names : [], sha: meta.sha };
+            if (!meta || !meta.content) return none;
+            const data = JSON.parse(b64ToUtf8(meta.content));
+            if (Array.isArray(data)) return { names: data, cats: [], sha: meta.sha };
+            const cats = (Array.isArray(data.categories) ? data.categories : [])
+                .filter(c => c && typeof c.nom === 'string' && c.nom.trim())
+                .map(c => ({ name: c.nom, dirs: Array.isArray(c.dossiers) ? c.dossiers : [] }));
+            return { names: Array.isArray(data.ordre) ? data.ordre : [], cats, sha: meta.sha };
         } catch {
-            return { names: [], sha: null };
+            return none;
         }
+    }
+
+    // Contenu du fichier d'ordre ; ren = { from, to } quand un morceau change de nom
+    function orderJSON(box, ren) {
+        const fix = n => (ren && n === ren.from ? ren.to : n);
+        const names = box._tree.dirs.map(d => fix(d.name));
+        const categories = (box._cats || []).map(c => ({
+            nom: c.name,
+            dossiers: box._tree.dirs.filter(d => catOf(box, d) === c.name).map(d => fix(d.name)),
+        }));
+        return JSON.stringify(categories.length ? { ordre: names, categories } : names, null, 1);
+    }
+
+    // Catégorie d'un morceau de premier niveau ('' = sans catégorie)
+    function catOf(box, node) {
+        const c = box._assign && box._assign.get(node.name);
+        return c && (box._cats || []).some(x => x.name === c) ? c : '';
     }
 
     // Morceaux rangés selon l'ordre enregistré ; ceux qui n'y sont pas encore vont à la fin, par nom
@@ -181,34 +204,122 @@ window.DLBPartitions = (() => {
         });
     }
 
-    function saveOrderSoon(box) {
+    function saveOrderSoon(box, done) {
         clearTimeout(box._saveTimer);
-        box._saveTimer = setTimeout(() => saveOrder(box), 700);
+        box._saveTimer = setTimeout(() => {
+            box._saving = (box._saving || Promise.resolve()).then(() => saveOrder(box, done));
+        }, 700);
     }
 
-    async function saveOrder(box) {
+    async function saveOrder(box, done) {
         const f = box.dataset.formation;
-        const names = box._tree.dirs.map(d => d.name);
-        status(box, 'ok', "Enregistrement de l'ordre…");
+        status(box, 'ok', 'Enregistrement du classement…');
         try {
-            const body = { message: `Ordre des morceaux : ${f}`, content: utf8ToB64(JSON.stringify(names, null, 1)) };
+            const body = { message: `Classement des morceaux : ${f}`, content: utf8ToB64(orderJSON(box)) };
             if (box._orderSha) body.sha = box._orderSha;
             const res = await gh(`${f}/${ORDER_FILE}`, { method: 'PUT', body, cred: write });
             box._orderSha = res.content.sha;
-            status(box, 'ok', 'Ordre enregistré : tous les membres voient les morceaux dans cet ordre.');
+            status(box, 'ok', done || 'Classement enregistré : tous les membres le voient.');
         } catch (e) {
             console.warn('Ordre', f, e);
-            status(box, 'err', "L'ordre n'a pas pu être enregistré. Rechargez la page et réessayez.");
+            status(box, 'err', "Le classement n'a pas pu être enregistré. Rechargez la page et réessayez.");
         }
     }
 
-    function moveDir(box, from, to) {
+    // Monter / descendre un morceau à l'intérieur de sa catégorie
+    function moveInGroup(box, path, delta) {
         const dirs = box._tree.dirs;
-        if (to < 0 || to >= dirs.length || from === to) return;
-        dirs.splice(to, 0, dirs.splice(from, 1)[0]);
+        const d = dirs.find(x => x.path === path);
+        if (!d) return;
+        const cat = catOf(box, d);
+        const g = dirs.filter(x => catOf(box, x) === cat);
+        const other = g[g.indexOf(d) + delta];
+        if (!other) return;
+        const a = dirs.indexOf(d), b = dirs.indexOf(other);
+        [dirs[a], dirs[b]] = [dirs[b], dirs[a]];
         render(box);
         saveOrderSoon(box);
     }
+
+    /* ---------- catégories (regroupent des morceaux, sans déplacer les fichiers) ---------- */
+    const findCat = (box, name) => (box._cats || []).find(c => c.name === name);
+    const catSection = (box, name) => [...box.querySelectorAll('.part-cat')].find(s => s.dataset.cat === name);
+
+    function newCategory(box) {
+        if (!box._tree) return;
+        box._cats = box._cats || [];
+        let name = 'Nouvelle catégorie', n = 2;
+        while (findCat(box, name)) name = `Nouvelle catégorie ${n++}`;
+        box._cats.push({ name });
+        render(box);
+        renameCategory(box, name, true);
+    }
+
+    function renameCategory(box, name, isNew) {
+        const sec = catSection(box, name);
+        const holder = sec && sec.querySelector('.part-cat-name');
+        if (!holder || holder.querySelector('input')) return;
+        sec.scrollIntoView({ block: 'nearest' });
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'part-rename';
+        input.maxLength = 60;
+        input.value = name;
+        input.setAttribute('aria-label', 'Nom de la catégorie');
+        holder.replaceChildren(input);
+        input.focus();
+        input.select();
+
+        let done = false;
+        const finish = commit => {
+            if (done) return;
+            done = true;
+            const value = input.value.replace(/\s+/g, ' ').trim();
+            const cat = findCat(box, name);
+            if (!cat) return render(box);
+            if (!commit || !value) {
+                if (isNew) box._cats.splice(box._cats.indexOf(cat), 1);
+                return render(box);
+            }
+            if (value !== name && (box._cats || []).some(c => c !== cat && c.name.toLowerCase() === value.toLowerCase())) {
+                status(box, 'err', `Une catégorie « ${value} » existe déjà.`);
+                if (isNew) box._cats.splice(box._cats.indexOf(cat), 1);
+                return render(box);
+            }
+            cat.name = value;
+            box._assign.forEach((c, k) => { if (c === name) box._assign.set(k, value); });
+            if (box._catClosed && box._catClosed.delete(name)) box._catClosed.add(value);
+            render(box);
+            if (isNew || value !== name) {
+                saveOrderSoon(box, isNew ? `Catégorie « ${value} » créée : rangez-y des dossiers avec le bouton de rangement ou en les glissant.` : `Catégorie renommée en « ${value} ».`);
+            }
+        };
+        input.addEventListener('keydown', e => {
+            e.stopPropagation();
+            if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+            else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+        });
+        input.addEventListener('click', e => e.stopPropagation());
+        input.addEventListener('blur', () => finish(true));
+    }
+
+    // Petit menu « Ranger dans… » sous le bouton d'un dossier
+    function openCatMenu(box, btn) {
+        closeCatMenus();
+        const det = btn.closest('.part-folder');
+        const d = box._tree.dirs.find(x => x.path === det.dataset.dir);
+        if (!d) return;
+        const cur = catOf(box, d);
+        const opts = [{ name: '', label: 'Sans catégorie' }].concat((box._cats || []).map(c => ({ name: c.name, label: c.name })));
+        const menu = document.createElement('div');
+        menu.className = 'part-catmenu';
+        menu.innerHTML = '<p>Ranger dans…</p>' + opts.map(o =>
+            `<button type="button" data-act="setcat" data-cat="${esc(o.name)}"${o.name === cur ? ' class="current"' : ''}>
+                <i class="fas ${o.name ? 'fa-layer-group' : 'fa-inbox'}"></i> ${esc(o.label)}${o.name === cur ? ' <i class="fas fa-check"></i>' : ''}</button>`).join('');
+        btn.parentElement.appendChild(menu);
+        setTimeout(() => document.addEventListener('click', closeCatMenus, { once: true }), 0);
+    }
+    function closeCatMenus() { document.querySelectorAll('.part-catmenu').forEach(m => m.remove()); }
 
     /* ---------- chargement ---------- */
     async function load(box) {
@@ -219,6 +330,9 @@ window.DLBPartitions = (() => {
             const [items, order] = await Promise.all([ghTree(), readOrder(f)]);
             const tree = buildTree(items, f);
             box._orderSha = order.sha;
+            box._cats = order.cats.map(c => ({ name: c.name }));
+            box._assign = new Map();
+            order.cats.forEach(c => c.dirs.forEach(n => box._assign.set(n, c.name)));
             box._tree = { dirs: applyOrder(tree.folders, order.names), files: tree.files, root: tree };
             tree.folders = box._tree.dirs;
             render(box);
@@ -252,10 +366,11 @@ window.DLBPartitions = (() => {
                     ${sortable ? '<span class="part-grip" title="Glisser pour déplacer"><i class="fas fa-grip-vertical"></i></span>' : ''}
                     <i class="fas fa-folder part-icon"></i><i class="fas fa-folder-open part-icon"></i>
                     <span class="part-meta"><strong>${esc(node.name)}</strong><small>${plural(countOf(node), 'partition')}${node.folders.length ? ' · ' + plural(node.folders.length, 'dossier') : ''}</small></span>
-                    ${sortable ? `<span class="part-move">
+                    ${sortable && top.total > 1 ? `<span class="part-move">
                         <button type="button" data-act="up" title="Monter"${top.index === 0 ? ' disabled' : ''}><i class="fas fa-arrow-up"></i></button>
                         <button type="button" data-act="down" title="Descendre"${top.index === top.total - 1 ? ' disabled' : ''}><i class="fas fa-arrow-down"></i></button>
                     </span>` : ''}
+                    ${write && top && top.hasCats ? `<span class="part-catwrap"><button type="button" data-act="catmenu" class="part-ren" title="Ranger dans une catégorie"><i class="fas fa-folder-tree"></i></button></span>` : ''}
                     ${write ? `<button type="button" data-act="rename" class="part-ren" title="Renommer le dossier"><i class="fas fa-pen"></i></button>` : ''}
                     ${write ? `<button type="button" data-act="deldir" class="part-del part-deldir" title="Supprimer tout le dossier"><i class="fas fa-trash"></i></button>` : ''}
                     <i class="fas fa-chevron-down part-chevron"></i>
@@ -287,14 +402,41 @@ window.DLBPartitions = (() => {
 
         const dirs = t.dirs.map(d => filterNode(d, q)).filter(Boolean);
         const files = t.files.filter(x => !q || titleOf(x.name).toLowerCase().includes(q));
-        if (!dirs.length && !files.length) {
+        const cats = box._cats || [];
+        if (!dirs.length && !files.length && !(write && cats.length && !q)) {
             list.innerHTML = `<p class="members-empty"><i class="fas fa-music"></i> ${q ? 'Aucune partition ne correspond.' : 'Aucune partition pour le moment.'}</p>`;
             return;
         }
         const openSet = box._open || new Set();
-        const sortable = !!write && !q && dirs.length > 1;  // réordonner : éditeur, sans recherche en cours
-        list.innerHTML = dirs.map((d, i) => folderHTML(d.node, d, q, openSet, { sortable, index: i, total: dirs.length })).join('')
-            + files.map(fileHTML).join('');
+        const closed = box._catClosed || new Set();
+        const sortable = !!write && !q;  // réordonner / ranger : éditeur, sans recherche en cours
+        const group = cat => dirs.filter(d => catOf(box, d.node) === cat);
+        const folders = arr => arr.map((d, i) => folderHTML(d.node, d, q, openSet, { sortable, index: i, total: arr.length, hasCats: cats.length > 0 })).join('');
+        const hint = txt => (write && !q ? `<p class="part-cat-empty"><i class="fas fa-hand-pointer"></i> ${txt}</p>` : '');
+
+        const loose = group('');
+        let html = `<div class="part-cat-body part-loose" data-cat="">${folders(loose) || (cats.length ? hint('Morceaux sans catégorie : glissez un dossier ici pour le sortir de sa catégorie.') : '')}</div>`;
+        cats.forEach((c, ci) => {
+            const g = group(c.name);
+            if (!g.length && (q || !write)) return;  // catégorie vide : visible seulement des éditeurs
+            const isOpen = !!q || !closed.has(c.name);
+            html += `
+                <section class="part-cat${isOpen ? ' open' : ''}" data-cat="${esc(c.name)}">
+                    <div class="part-cat-head" title="Ouvrir / fermer">
+                        <i class="fas fa-chevron-right part-cat-chev"></i>
+                        <i class="fas fa-layer-group part-cat-icon"></i>
+                        <span class="part-cat-title"><strong class="part-cat-name">${esc(c.name)}</strong><small>${plural(g.length, 'morceau').replace('morceaus', 'morceaux')}</small></span>
+                        ${write ? `<span class="part-move">
+                            <button type="button" data-act="catup" title="Monter la catégorie"${ci === 0 ? ' disabled' : ''}><i class="fas fa-arrow-up"></i></button>
+                            <button type="button" data-act="catdown" title="Descendre la catégorie"${ci === cats.length - 1 ? ' disabled' : ''}><i class="fas fa-arrow-down"></i></button>
+                        </span>
+                        <button type="button" data-act="catrename" class="part-ren" title="Renommer la catégorie"><i class="fas fa-pen"></i></button>
+                        <button type="button" data-act="catdel" class="part-del part-deldir" title="Supprimer la catégorie (les dossiers sont gardés)"><i class="fas fa-trash"></i></button>` : ''}
+                    </div>
+                    <div class="part-cat-body" data-cat="${esc(c.name)}">${folders(g) || hint('Catégorie vide : glissez un dossier ici, ou utilisez le bouton <i class="fas fa-folder-tree"></i> d\'un dossier.')}</div>
+                </section>`;
+        });
+        list.innerHTML = html + files.map(fileHTML).join('');
         list.querySelectorAll('.part-folder').forEach(det => det.addEventListener('toggle', e => {
             e.stopPropagation();
             box._open = box._open || new Set();
@@ -303,10 +445,27 @@ window.DLBPartitions = (() => {
         if (sortable) enableDrag(box, list);
     }
 
-    // Glisser-déposer des morceaux de premier niveau (éditeurs)
+    // Glisser-déposer des morceaux de premier niveau (éditeurs) : ordre + changement de catégorie
     function enableDrag(box, list) {
         let dragged = null;
-        list.querySelectorAll(':scope > .part-folder.sortable').forEach(det => {
+        const snapshot = () => box._tree.dirs.map(d => d.path + '>' + catOf(box, d)).join('|');
+
+        function commit() {
+            const before = snapshot();
+            const paths = [];
+            list.querySelectorAll('.part-cat-body').forEach(body => body.querySelectorAll(':scope > .part-folder').forEach(det => {
+                paths.push(det.dataset.dir);
+                const d = box._tree.dirs.find(x => x.path === det.dataset.dir);
+                if (!d) return;
+                if (body.dataset.cat) box._assign.set(d.name, body.dataset.cat); else box._assign.delete(d.name);
+            }));
+            const rank = p => { const i = paths.indexOf(p); return i < 0 ? Infinity : i; };
+            box._tree.dirs.sort((a, b) => rank(a.path) - rank(b.path));
+            render(box);
+            if (snapshot() !== before) saveOrderSoon(box);
+        }
+
+        list.querySelectorAll('.part-cat-body > .part-folder.sortable').forEach(det => {
             det.addEventListener('dragstart', e => {
                 if (e.target !== det) return;
                 dragged = det;
@@ -316,22 +475,35 @@ window.DLBPartitions = (() => {
             });
             det.addEventListener('dragend', () => {
                 det.classList.remove('dragging');
+                list.querySelectorAll('.drop-over').forEach(x => x.classList.remove('drop-over'));
                 if (!dragged) return;
                 dragged = null;
-                // nouvel ordre = ordre des dossiers à l'écran
-                const paths = [...list.querySelectorAll(':scope > .part-folder')].map(x => x.dataset.dir);
-                const before = box._tree.dirs.map(d => d.path).join('|');
-                box._tree.dirs.sort((a, b) => paths.indexOf(a.path) - paths.indexOf(b.path));
-                if (box._tree.dirs.map(d => d.path).join('|') !== before) { render(box); saveOrderSoon(box); }
+                commit();
             });
             det.addEventListener('dragover', e => {
                 if (!dragged || dragged === det) return;
                 e.preventDefault();
+                e.stopPropagation();
                 const r = det.getBoundingClientRect();
-                list.insertBefore(dragged, e.clientY < r.top + r.height / 2 ? det : det.nextSibling);
+                det.parentNode.insertBefore(dragged, e.clientY < r.top + r.height / 2 ? det : det.nextSibling);
             });
-            det.addEventListener('drop', e => { if (dragged) e.preventDefault(); });
         });
+        // Déposer sur une catégorie (son titre ou sa zone vide) : le dossier va à la fin de cette catégorie
+        list.querySelectorAll('.part-cat-body').forEach(body => {
+            const target = body.closest('.part-cat');
+            const head = target && target.querySelector('.part-cat-head');
+            const into = e => {
+                if (!dragged) return;
+                e.preventDefault();
+                if (target && !target.classList.contains('open')) target.classList.add('open');
+                if (dragged.parentNode !== body || e.currentTarget === head) body.appendChild(dragged);
+                list.querySelectorAll('.drop-over').forEach(x => x.classList.remove('drop-over'));
+                (target || body).classList.add('drop-over');
+            };
+            body.addEventListener('dragover', into);
+            if (head) head.addEventListener('dragover', into);
+        });
+        if (!list._dropBound) { list._dropBound = true; list.addEventListener('drop', e => { if (e.dataTransfer?.types?.includes('text/plain')) e.preventDefault(); }); }
     }
 
     function armConfirm(btn) {  // confirmation en deux clics, sans fenêtre bloquante
@@ -398,8 +570,7 @@ window.DLBPartitions = (() => {
             moves = filesOf(node).map(it => ({ from: it.path, to: newDir + it.path.slice(oldDir.length), sha: it.sha }));
             label = `Dossier « ${node.name} » renommé en « ${value} ».`;
             if (parentPath === f) {  // morceau de premier niveau : garder sa place dans l'ordre
-                const names = box._tree.dirs.map(d => d === node ? value : d.name);
-                extra = [{ path: `${f}/${ORDER_FILE}`, content: JSON.stringify(names, null, 1) }];
+                extra = [{ path: `${f}/${ORDER_FILE}`, content: orderJSON(box, { from: node.name, to: value }) }];
             }
         } else {
             const { path, sha, name } = item.dataset;
@@ -436,9 +607,45 @@ window.DLBPartitions = (() => {
         if (act === 'rename') { startRename(box, btn); return; }
 
         if (act === 'up' || act === 'down') {
-            const path = btn.closest('.part-folder').dataset.dir;
-            const i = box._tree.dirs.findIndex(d => d.path === path);
-            moveDir(box, i, act === 'up' ? i - 1 : i + 1);
+            moveInGroup(box, btn.closest('.part-folder').dataset.dir, act === 'up' ? -1 : 1);
+            return;
+        }
+
+        // Catégories
+        if (act === 'catmenu') { openCatMenu(box, btn); return; }
+        if (act === 'setcat') {
+            const d = box._tree.dirs.find(x => x.path === btn.closest('.part-folder').dataset.dir);
+            closeCatMenus();
+            if (!d) return;
+            const cat = btn.dataset.cat;
+            if (cat === catOf(box, d)) return;
+            if (cat) box._assign.set(d.name, cat); else box._assign.delete(d.name);
+            if (cat && box._catClosed) box._catClosed.delete(cat);
+            render(box);
+            saveOrderSoon(box, cat ? `« ${d.name} » rangé dans « ${cat} ».` : `« ${d.name} » sorti de sa catégorie.`);
+            return;
+        }
+        if (act.startsWith('cat')) {
+            const name = btn.closest('.part-cat')?.dataset.cat;
+            const cat = findCat(box, name);
+            if (!cat) return;
+            if (act === 'catrename') { renameCategory(box, name, false); return; }
+            if (act === 'catup' || act === 'catdown') {
+                const i = box._cats.indexOf(cat), j = i + (act === 'catup' ? -1 : 1);
+                if (j < 0 || j >= box._cats.length) return;
+                [box._cats[i], box._cats[j]] = [box._cats[j], box._cats[i]];
+                render(box);
+                saveOrderSoon(box);
+                return;
+            }
+            if (act === 'catdel') {
+                if (!armConfirm(btn)) return;
+                box._cats.splice(box._cats.indexOf(cat), 1);
+                box._assign.forEach((c, k) => { if (c === name) box._assign.delete(k); });
+                render(box);
+                saveOrderSoon(box, `Catégorie « ${name} » supprimée : ses dossiers sont revenus dans « sans catégorie ».`);
+                return;
+            }
             return;
         }
 
@@ -614,6 +821,9 @@ window.DLBPartitions = (() => {
         root.querySelectorAll('.partitions').forEach(box => {
             if (box.querySelector('.part-drop')) return;
             box.querySelector('.part-tools').insertAdjacentHTML('afterend', dropzoneHTML());
+            box.querySelector('.part-count').insertAdjacentHTML('beforebegin',
+                '<button type="button" class="btn btn-outline part-newcat"><i class="fas fa-folder-plus"></i> Nouvelle catégorie</button>');
+            box.querySelector('.part-newcat').addEventListener('click', () => newCategory(box));
             const zone = box.querySelector('.part-drop');
             const inFiles = zone.querySelector('.pick-files'), inDir = zone.querySelector('.pick-dir');
             zone.addEventListener('click', e => {
@@ -709,8 +919,18 @@ window.DLBPartitions = (() => {
             box.querySelector('.part-search').addEventListener('input', () => render(box));
             box.querySelector('.part-list').addEventListener('click', e => {
                 const btn = e.target.closest('button[data-act]');
-                if (!btn) return;
-                if (['deldir', 'up', 'down', 'rename'].includes(btn.dataset.act)) e.preventDefault();  // ne pas replier le dossier
+                if (!btn) {
+                    // clic sur le titre d'une catégorie : ouvrir / fermer
+                    const head = e.target.closest('.part-cat-head');
+                    if (head && !e.target.closest('input')) {
+                        const sec = head.closest('.part-cat'), name = sec.dataset.cat;
+                        box._catClosed = box._catClosed || new Set();
+                        sec.classList.toggle('open') ? box._catClosed.delete(name) : box._catClosed.add(name);
+                    }
+                    return;
+                }
+                if (['deldir', 'up', 'down', 'rename', 'catmenu', 'setcat'].includes(btn.dataset.act)) e.preventDefault();  // ne pas replier le dossier
+                if (btn.dataset.act === 'catmenu' || btn.dataset.act === 'setcat') e.stopPropagation();
                 onAction(box, btn);
             });
         });
