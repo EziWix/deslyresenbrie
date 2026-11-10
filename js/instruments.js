@@ -22,9 +22,9 @@ const GLB = {
     'clarinette':    { view: [0.4, 0.2, 1], rot: [0, 0, -40] },
     'hautbois':      { view: [0.4, 0.2, 1], rot: [0, 0, -40] },
     'saxophone':     { view: [0.5, 0.1, 1] },
-    'caisse-claire': { view: [0.3, 0.8, 1] },
-    'grosse-caisse': { view: [0.6, 0.2, 1] },
-    'cymbales':      { view: [0.3, 0.75, 1] },
+    'batterie':      { view: [0.45, 0.45, 1] },
+    'timbales':      { view: [0.25, 0.6, 1] },
+    'petites-percussions': { view: [0.3, 0.55, 1] },
     'xylophone':     { view: [0.3, 0.75, 1] },
 };
 
@@ -77,18 +77,18 @@ const INSTRUMENTS = [
       resume: "Inventé par le Belge Adolphe Sax dans les années 1840, il marie un corps en laiton et l'anche d'une clarinette.",
       role: "Contre-chants, mélodies, et une touche de jazz.",
       anecdote: "Malgré son corps en métal, c'est un bois : son son vient de son anche." },
-    { id: 'caisse-claire', cat: 'percussions', nom: 'Caisse claire',
-      resume: "Un tambour peu profond avec, sous la peau du bas, des fils métalliques tendus (le timbre) qui donnent son claquement sec.",
-      role: "Rythme, roulements, marches.",
-      anecdote: "Les roulements s'obtiennent en faisant rebondir les baguettes très vite sur la peau." },
-    { id: 'grosse-caisse', cat: 'percussions', nom: 'Grosse caisse',
-      resume: "Le cœur battant de l'orchestre : un grand tambour frappé avec une mailloche en feutre.",
-      role: "Les temps forts et la pulsation.",
-      anecdote: "Dans les défilés, c'est elle qui donne le pas à tout l'orchestre." },
-    { id: 'cymbales', cat: 'percussions', nom: 'Cymbales',
-      resume: "Deux disques de bronze qu'on frappe l'un contre l'autre pour des éclats spectaculaires.",
-      role: "Accents et moments forts.",
-      anecdote: "Elles sont faites d'un alliage de cuivre et d'étain, souvent martelé à la main." },
+    { id: 'batterie', cat: 'percussions', nom: 'Batterie',
+      resume: "Plusieurs instruments joués par un seul musicien : grosse caisse au pied, caisse claire, toms, charleston et cymbales.",
+      role: "Le moteur rythmique : elle donne le tempo et l'énergie à tout l'orchestre.",
+      anecdote: "Le batteur joue avec ses quatre membres à la fois : les deux pieds actionnent la grosse caisse et la charleston." },
+    { id: 'timbales', cat: 'percussions', nom: 'Timbales',
+      resume: "De grandes bassines en cuivre recouvertes d'une peau. Une pédale change la tension de la peau, et donc la note, pendant qu'on joue.",
+      role: "Roulements spectaculaires et notes graves accordées.",
+      anecdote: "Contrairement à la plupart des tambours, les timbales jouent de vraies notes : on les accorde avant chaque morceau." },
+    { id: 'petites-percussions', cat: 'percussions', nom: 'Petites percussions',
+      resume: "Congas, triangle, tambourin, maracas, cloche, wood-block, claves et cymbales : toute une palette de sons pour colorer la musique.",
+      role: "Couleurs, effets et ambiances, du tintement du triangle au groove des congas.",
+      anecdote: "Un percussionniste peut changer d'instrument plusieurs fois dans un même morceau !" },
     { id: 'xylophone', cat: 'percussions', nom: 'Xylophone',
       resume: "Des lames de bois accordées, frappées avec des maillets. Les tubes placés dessous amplifient le son.",
       role: "Mélodies sautillantes et couleurs brillantes.",
@@ -154,7 +154,10 @@ function loadGlb(id) {
 // Le .glb s'il existe, sinon le modèle codé
 async function instrumentObject(id) {
     const scene = await loadGlb(id);
-    if (!scene) return { ...build(id), shared: false };
+    if (!scene) {
+        try { return { ...build(id), shared: false }; }
+        catch { return { group: new THREE.Group(), view: new THREE.Vector3(0.3, 0.3, 1), shared: false }; }
+    }
     const cfg = GLB[id];
     const group = new THREE.Group();
     const model = scene.clone(true);  // les géométries restent partagées avec le cache

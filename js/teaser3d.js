@@ -12,7 +12,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 const VIEWS = {
     'cor': [0.25, 0.15, 1],
     'saxophone': [0.5, 0.1, 1],
-    'caisse-claire': [0.3, 0.8, 1],
+    'batterie': [0.45, 0.45, 1],
 };
 
 const box = document.getElementById('teaser');
