@@ -5,31 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instruments | Des Lyres en Brie</title>
     <meta name="description" content="Découvrez en 3D les instruments de l'orchestre : cuivres, bois et percussions.">
+    <meta name="theme-color" content="#16090b">
+    <meta property="og:title" content="Instruments | Des Lyres en Brie">
+    <meta property="og:description" content="Découvrez en 3D les instruments de l'orchestre : cuivres, bois et percussions.">
+    <meta property="og:image" content="images/logo.png">
     <link rel="icon" href="favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="192x192" href="images/favicon-192.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,800;1,9..144,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Paytone+One&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=8">
+    <link rel="stylesheet" href="css/style.css?v=20">
 </head>
 <body>
+    <div class="scroll-progress" id="scrollProgress"></div>
     <header class="site-header" id="header">
         <div class="header-inner">
             <a href="index.html" class="logo" aria-label="Des Lyres en Brie - accueil">
-                <img class="logo-mark" src="images/logo-mark.png" alt="" width="62" height="46">
+                <img class="logo-mark" src="images/logo-mark.png" alt="" width="57" height="42">
                 <span class="logo-text">Des Lyres <em>en Brie</em></span>
             </a>
             <nav class="main-nav" id="mainNav">
-                <a href="index.html" class="nav-link">Accueil</a>
-                <a href="association.html" class="nav-link">L'association</a>
-                <a href="instruments.html" class="nav-link active">Instruments</a>
-                <a href="agenda.html" class="nav-link">Agenda</a>
-                <a href="galerie.html" class="nav-link">Galerie</a>
-                <a href="contact.html" class="nav-link">Contact</a>
+                <a href="index.html" class="nav-link"><i class="fas fa-house"></i> Accueil</a>
+                <a href="association.html" class="nav-link"><i class="fas fa-people-group"></i> L'association</a>
+                <a href="instruments.html" class="nav-link active"><i class="fas fa-drum"></i> Instruments</a>
+                <a href="agenda.html" class="nav-link"><i class="fas fa-calendar-days"></i> Agenda</a>
+                <a href="galerie.html" class="nav-link"><i class="fas fa-images"></i> Galerie</a>
                 <a href="livre-dor.html" class="nav-link"><i class="fas fa-feather-pointed"></i> Livre d'or</a>
-                <a href="membres.html" class="nav-link"><i class="fas fa-lock"></i> Membres</a>
+                <span class="nav-actions">
+                    <a href="membres.html" class="nav-btn nav-btn-ghost"><i class="fas fa-lock"></i> Membres</a>
+                    <a href="contact.html" class="nav-btn nav-btn-primary"><i class="fas fa-envelope"></i> Contact</a>
+                </span>
             </nav>
             <button class="hamburger" id="hamburger" aria-label="Ouvrir le menu" aria-expanded="false">
                 <span></span><span></span><span></span>
@@ -38,7 +45,7 @@
     </header>
 
     <main>
-        <section class="page-banner">
+        <section class="page-banner wave-bottom">
             <div class="container">
                 <h1>Les instruments</h1>
                 <p>Faites-les tourner dans tous les sens et découvrez chaque famille de l'orchestre</p>
@@ -73,14 +80,11 @@
         </section>
     </main>
 
-    <footer class="site-footer">
+    <footer class="site-footer wave-top">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-about">
-                    <a href="index.html" class="logo">
-                        <img class="logo-mark" src="images/logo-mark.png" alt="" width="62" height="46">
-                        <span class="logo-text">Des Lyres <em>en Brie</em></span>
-                    </a>
+                    <a href="index.html" aria-label="Des Lyres en Brie - accueil"><img class="footer-logo" src="images/logo.webp" alt="Des Lyres en Brie" width="150" height="186" loading="lazy"></a>
                     <p>Association musicale loi 1901 : faire vivre la musique en Brie, ensemble.</p>
                     <div class="socials">
                         <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
@@ -94,7 +98,6 @@
                         <li><a href="instruments.html">Instruments</a></li>
                         <li><a href="agenda.html">Agenda</a></li>
                         <li><a href="galerie.html">Galerie</a></li>
-                        <li><a href="contact.html">Contact</a></li>
                         <li><a href="livre-dor.html">Livre d'or</a></li>
                         <li><a href="membres.html">Espace membres</a></li>
                     </ul>
@@ -104,18 +107,20 @@
                     <ul>
                         <li><a href="mailto:contact@deslyresenbrie.fr"><i class="far fa-envelope"></i> contact@deslyresenbrie.fr</a></li>
                         <li><a href="https://www.google.com/maps/search/?api=1&amp;query=Rue+des+Carri%C3%A8res+77169+Boissy-le-Ch%C3%A2tel" target="_blank" rel="noopener"><i class="fas fa-location-dot"></i> Rue des Carrières<br>77169 Boissy-le-Châtel</a></li>
+                        <li><a href="contact.html"><i class="fas fa-paper-plane"></i> Nous écrire</a></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
                 <span>&copy; <span class="year"></span> Des Lyres en Brie</span>
-                <span>Fait avec <i class="fas fa-heart" style="color:var(--brass)"></i> et beaucoup de musique</span>
+                <span>Fait avec <i class="fas fa-heart"></i> et beaucoup de musique</span>
             </div>
         </div>
     </footer>
 
-    <script src="js/data.js?v=4"></script>
-    <script src="js/main.js?v=4"></script>
+    <button class="to-top" id="toTop" type="button" aria-label="Revenir en haut de la page"><i class="fas fa-arrow-up"></i></button>
+
+    <script src="js/data.js?v=20"></script>
     <script type="importmap">
     {
         "imports": {
@@ -124,6 +129,7 @@
         }
     }
     </script>
-    <script type="module" src="js/instruments.js?v=3"></script>
+    <script type="module" src="js/instruments.js?v=4"></script>
+    <script src="js/main.js?v=20"></script>
 </body>
 </html>

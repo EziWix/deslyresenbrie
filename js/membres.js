@@ -74,6 +74,10 @@
             show(html);
         } catch {
             error.hidden = false;
+            const card = form.closest('.login-card');
+            card.classList.remove('shake');
+            void card.offsetWidth;  // relance l'animation
+            card.classList.add('shake');
             input.value = '';
             input.focus();
         } finally {

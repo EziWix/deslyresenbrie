@@ -2,54 +2,173 @@
    Des Lyres en Brie — scripts communs
    ========================================================= */
 
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FINE_POINTER = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
 document.addEventListener('DOMContentLoaded', () => {
     initHeader();
-    initReveal();
     renderEvents();
     renderGallery();
     initPlayer();
     initContactForm();
     initGuestbook();
+    initMarquee();
+    initNotes();
+    initHeroParallax();
+    initTilt();
+    initCounters();
+    initReveal();  // en dernier : observe aussi les blocs générés ci-dessus
     document.querySelectorAll('.year').forEach(el => { el.textContent = new Date().getFullYear(); });
 });
 
-/* ---------- En-tête : fond au défilement + menu mobile ---------- */
+/* ---------- En-tête : fond au défilement, menu mobile, progression, retour en haut ---------- */
 function initHeader() {
     const header = document.getElementById('header');
     const burger = document.getElementById('hamburger');
     const nav = document.getElementById('mainNav');
+    const progress = document.getElementById('scrollProgress');
+    const toTop = document.getElementById('toTop');
 
-    const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 40);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
+    let ticking = false;
+    const update = () => {
+        ticking = false;
+        const y = window.scrollY;
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        header.classList.toggle('scrolled', y > 40);
+        if (progress) progress.style.transform = `scaleX(${max > 0 ? Math.min(y / max, 1) : 0})`;
+        if (toTop) toTop.classList.toggle('show', y > 600);
+    };
+    update();
+    window.addEventListener('scroll', () => {
+        if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    window.addEventListener('resize', update);
 
-    burger.addEventListener('click', () => {
-        const open = nav.classList.toggle('open');
+    if (toTop) toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: REDUCED_MOTION ? 'auto' : 'smooth' }));
+
+    const setOpen = open => {
+        nav.classList.toggle('open', open);
         burger.classList.toggle('open', open);
         burger.setAttribute('aria-expanded', open);
-    });
-    nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-        nav.classList.remove('open');
-        burger.classList.remove('open');
-    }));
+    };
+    burger.addEventListener('click', () => setOpen(!nav.classList.contains('open')));
+    nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('click', e => { if (!header.contains(e.target)) setOpen(false); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
 }
 
-/* ---------- Apparition des blocs ---------- */
+/* ---------- Apparition des blocs (en cascade dans une même grille) ---------- */
 function initReveal() {
-    const items = document.querySelectorAll('.reveal');
-    if (!('IntersectionObserver' in window)) {
-        items.forEach(el => el.classList.add('visible'));
+    const items = [...document.querySelectorAll('.reveal:not(.visible)')];
+    const settle = el => {
+        // une fois apparu, on retire les classes pour rendre la main aux effets de survol
+        const delay = parseFloat(el.style.getPropertyValue('--d')) || 0;
+        setTimeout(() => { el.classList.remove('reveal', 'visible'); el.style.removeProperty('--d'); }, 900 + delay * 1000);
+    };
+    if (!('IntersectionObserver' in window) || REDUCED_MOTION) {
+        items.forEach(el => el.classList.remove('reveal'));
         return;
     }
+    // décalage selon la position parmi les frères qui apparaissent aussi
+    items.forEach(el => {
+        const siblings = [...el.parentElement.children].filter(c => c.classList.contains('reveal'));
+        const i = siblings.indexOf(el);
+        if (i > 0) el.style.setProperty('--d', Math.min(i * 0.09, 0.6) + 's');
+    });
     const io = new IntersectionObserver(entries => {
         entries.forEach(e => {
-            if (e.isIntersecting) {
-                e.target.classList.add('visible');
-                io.unobserve(e.target);
-            }
+            if (!e.isIntersecting) return;
+            e.target.classList.add('visible');
+            io.unobserve(e.target);
+            settle(e.target);
         });
-    }, { threshold: 0.12 });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
     items.forEach(el => io.observe(el));
+}
+
+/* ---------- Compteurs animés : <span data-count="14" data-suffix=" %"> ---------- */
+function animateCount(el) {
+    const target = Number(el.dataset.count);
+    const prefix = el.dataset.prefix || '', suffix = el.dataset.suffix || '';
+    if (REDUCED_MOTION || !isFinite(target)) { el.textContent = prefix + el.dataset.count + suffix; return; }
+    const t0 = performance.now(), dur = 1400;
+    const tick = now => {
+        const p = Math.min((now - t0) / dur, 1);
+        el.textContent = prefix + Math.round(target * (1 - Math.pow(1 - p, 3))) + suffix;
+        if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+}
+
+function initCounters() {
+    const els = document.querySelectorAll('[data-count]');
+    if (!els.length) return;
+    if (!('IntersectionObserver' in window)) { els.forEach(animateCount); return; }
+    const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            io.unobserve(e.target);
+            animateCount(e.target);
+        });
+    }, { threshold: 0.4 });
+    els.forEach(el => io.observe(el));
+}
+
+/* ---------- Bandeau défilant : le contenu est doublé pour boucler sans raccord ---------- */
+function initMarquee() {
+    document.querySelectorAll('.marquee-track').forEach(track => {
+        [...track.children].forEach(c => {
+            const clone = c.cloneNode(true);
+            clone.setAttribute('aria-hidden', 'true');
+            clone.tabIndex = -1;
+            track.appendChild(clone);
+        });
+    });
+}
+
+/* ---------- Notes de musique qui montent dans le héros ---------- */
+function initNotes() {
+    const box = document.querySelector('.notes');
+    if (!box || REDUCED_MOTION) return;
+    const glyphs = ['♪', '♫', '♩', '♬'];
+    const n = window.innerWidth < 700 ? 10 : 20;
+    for (let i = 0; i < n; i++) {
+        const s = document.createElement('span');
+        s.textContent = glyphs[i % glyphs.length];
+        s.style.left = (Math.random() * 96 + 2) + '%';
+        s.style.fontSize = (18 + Math.random() * 34) + 'px';
+        s.style.animationDuration = (11 + Math.random() * 14) + 's';
+        s.style.animationDelay = (-Math.random() * 25) + 's';
+        box.appendChild(s);
+    }
+}
+
+/* ---------- Héros : la lueur et le logo suivent légèrement la souris ---------- */
+function initHeroParallax() {
+    const hero = document.querySelector('.hero');
+    if (!hero || !FINE_POINTER || REDUCED_MOTION) return;
+    const title = hero.querySelector('.hero-title');
+    hero.addEventListener('pointermove', e => {
+        const r = hero.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width * 2 - 1, y = (e.clientY - r.top) / r.height * 2 - 1;
+        hero.style.setProperty('--mx', x.toFixed(3));
+        hero.style.setProperty('--my', y.toFixed(3));
+        if (title) title.style.transform = `translate(${(x * -10).toFixed(1)}px, ${(y * -6).toFixed(1)}px)`;
+    });
+}
+
+/* ---------- Cartes qui s'inclinent sous la souris ---------- */
+function initTilt() {
+    if (!FINE_POINTER || REDUCED_MOTION) return;
+    document.querySelectorAll('.tilt').forEach(el => {
+        el.addEventListener('pointermove', e => {
+            if (el.classList.contains('reveal')) return;
+            const r = el.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+            el.style.transform = `perspective(700px) translateY(-6px) rotateX(${(-y * 7).toFixed(2)}deg) rotateY(${(x * 9).toFixed(2)}deg)`;
+        });
+        el.addEventListener('pointerleave', () => { el.style.transform = ''; });
+    });
 }
 
 /* ---------- Agenda ---------- */
@@ -61,14 +180,14 @@ function parseDate(str) {
     return new Date(y, m - 1, d);
 }
 
-function eventHTML(ev, past) {
+function eventHTML(ev, past, isNext) {
     const d = parseDate(ev.date);
     const lieu = [ev.lieu, ev.ville].filter(Boolean).join(', ');
     const titre = ev.lien
         ? `<a href="${ev.lien}" target="_blank" rel="noopener">${ev.titre} <i class="fas fa-arrow-up-right-from-square" style="font-size:.7em"></i></a>`
         : ev.titre;
     return `
-        <article class="event${past ? ' past' : ''}">
+        <article class="event reveal${past ? ' past' : ''}${isNext ? ' next' : ''}">
             <div class="event-date">
                 <span class="event-day">${d.getDate()}</span>
                 <span class="event-month">${MOIS[d.getMonth()]} ${d.getFullYear()}</span>
@@ -81,6 +200,7 @@ function eventHTML(ev, past) {
                 </div>
             </div>
             <div class="event-tags">
+                ${isNext ? '<span class="event-tag" style="background:var(--red);color:#fff"><i class="fas fa-bolt"></i> Prochain</span>' : ''}
                 ${ev.type ? `<span class="event-tag">${ev.type}</span>` : ''}
                 ${ev.aConfirmer && !past ? '<span class="event-tag event-tbc"><i class="fas fa-circle-question"></i> À confirmer</span>' : ''}
             </div>
@@ -91,6 +211,11 @@ function emptyHTML(text) {
     return `<div class="events-empty"><i class="far fa-calendar"></i>${text}</div>`;
 }
 
+// « dans 11 jours », « demain », « aujourd'hui »
+function daysLabel(n) {
+    return n === 0 ? "aujourd'hui" : n === 1 ? 'demain' : `dans ${n} jours`;
+}
+
 function renderEvents() {
     if (typeof EVENTS === 'undefined') return;
     const today = new Date();
@@ -99,26 +224,59 @@ function renderEvents() {
     const sorted = [...EVENTS].sort((a, b) => parseDate(a.date) - parseDate(b.date));
     const upcoming = sorted.filter(ev => parseDate(ev.date) >= today);
     const past = sorted.filter(ev => parseDate(ev.date) < today).reverse();
+    const next = upcoming[0];
+    const daysTo = ev => Math.round((parseDate(ev.date) - today) / 86400000);
+    const shortDate = ev => { const d = parseDate(ev.date); return `${d.getDate()} ${MOIS[d.getMonth()]}`; };
 
     // Accueil : les 3 prochaines dates
     const home = document.getElementById('nextEvents');
     if (home) {
         home.innerHTML = upcoming.length
-            ? upcoming.slice(0, 3).map(ev => eventHTML(ev, false)).join('')
+            ? upcoming.slice(0, 3).map((ev, i) => eventHTML(ev, false, i === 0)).join('')
             : emptyHTML('Les prochaines dates arrivent très bientôt.');
     }
+
+    // Accueil : pastille « prochain rendez-vous » du héros
+    const pill = document.getElementById('nextPill');
+    if (pill) {
+        pill.innerHTML = next
+            ? `<small>Prochain rendez-vous · ${daysLabel(daysTo(next))}</small><strong>${shortDate(next)} — ${next.titre}</strong>`
+            : `<small>Agenda</small><strong>Les prochaines dates arrivent bientôt</strong>`;
+    }
+
+    // Accueil : chiffres calculés depuis l'agenda
+    const setStat = (name, value, opts = {}) => {
+        const el = document.querySelector(`[data-stat="${name}"]`);
+        if (!el) return;
+        if (typeof value === 'number') { el.dataset.count = value; Object.assign(el.dataset, opts); el.textContent = (opts.prefix || '') + '0'; }
+        else el.textContent = value;
+    };
+    setStat('upcoming', upcoming.length);
+    if (next) {
+        const n = daysTo(next);
+        if (n === 0) setStat('days', 'Jour J'); else setStat('days', n, { prefix: 'J-' });
+    } else setStat('days', '—');
+
+    // Accueil : prochaine date de chaque formation
+    document.querySelectorAll('[data-next-type]').forEach(el => {
+        const ev = upcoming.find(e => e.type === el.dataset.nextType);
+        el.textContent = ev ? `${shortDate(ev)} · ${ev.ville || ev.lieu || ''}` : 'Bientôt annoncée';
+    });
+    document.querySelectorAll('[data-count-type]').forEach(el => {
+        el.textContent = upcoming.filter(e => e.type === el.dataset.countType).length;
+    });
 
     // Page agenda : à venir + déjà joué
     const up = document.getElementById('upcomingEvents');
     if (up) {
         up.innerHTML = upcoming.length
-            ? upcoming.map(ev => eventHTML(ev, false)).join('')
+            ? upcoming.map((ev, i) => eventHTML(ev, false, i === 0)).join('')
             : emptyHTML('Aucune date annoncée pour le moment. Suivez-nous sur Facebook pour être prévenus.');
     }
     const pastBox = document.getElementById('pastEvents');
     if (pastBox) {
         const block = document.getElementById('pastBlock');
-        if (past.length) pastBox.innerHTML = past.map(ev => eventHTML(ev, true)).join('');
+        if (past.length) pastBox.innerHTML = past.map(ev => eventHTML(ev, true, false)).join('');
         else if (block) block.hidden = true;
     }
 }
