@@ -69,20 +69,75 @@ window.DLBPartitions = (() => {
         });
     }
 
+    /* ---------- ordre des morceaux : <formation>/_ordre.json (liste de noms de dossiers) ---------- */
+    const ORDER_FILE = '_ordre.json';
+    const utf8ToB64 = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+    const b64ToUtf8 = b => new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\s/g, '')), c => c.charCodeAt(0)));
+
+    async function readOrder(f) {
+        try {
+            const meta = await gh(`${f}/${ORDER_FILE}`);
+            if (!meta || !meta.content) return { names: [], sha: null };
+            const names = JSON.parse(b64ToUtf8(meta.content));
+            return { names: Array.isArray(names) ? names : [], sha: meta.sha };
+        } catch {
+            return { names: [], sha: null };
+        }
+    }
+
+    // Morceaux rangés selon l'ordre enregistré ; ceux qui n'y sont pas encore vont à la fin, par nom
+    function applyOrder(dirs, names) {
+        const rank = new Map(names.map((n, i) => [n, i]));
+        return dirs.sort((a, b) => {
+            const ra = rank.has(a.name) ? rank.get(a.name) : Infinity, rb = rank.has(b.name) ? rank.get(b.name) : Infinity;
+            return ra !== rb ? ra - rb : byName(a, b);
+        });
+    }
+
+    function saveOrderSoon(box) {
+        clearTimeout(box._saveTimer);
+        box._saveTimer = setTimeout(() => saveOrder(box), 700);
+    }
+
+    async function saveOrder(box) {
+        const f = box.dataset.formation;
+        const names = box._tree.dirs.map(d => d.name);
+        status(box, 'ok', "Enregistrement de l'ordre…");
+        try {
+            const body = { message: `Ordre des morceaux : ${f}`, content: utf8ToB64(JSON.stringify(names, null, 1)) };
+            if (box._orderSha) body.sha = box._orderSha;
+            const res = await gh(`${f}/${ORDER_FILE}`, { method: 'PUT', body, cred: write });
+            box._orderSha = res.content.sha;
+            status(box, 'ok', 'Ordre enregistré : tous les membres voient les morceaux dans cet ordre.');
+        } catch (e) {
+            console.warn('Ordre', f, e);
+            status(box, 'err', "L'ordre n'a pas pu être enregistré. Rechargez la page et réessayez.");
+        }
+    }
+
+    function moveDir(box, from, to) {
+        const dirs = box._tree.dirs;
+        if (to < 0 || to >= dirs.length || from === to) return;
+        dirs.splice(to, 0, dirs.splice(from, 1)[0]);
+        render(box);
+        saveOrderSoon(box);
+    }
+
     /* ---------- lecture : formation -> morceaux (dossiers) + PDF seuls ---------- */
     async function load(box) {
         const f = box.dataset.formation;
         const list = box.querySelector('.part-list');
         list.innerHTML = '<p class="members-empty"><i class="fas fa-spinner fa-spin"></i> Chargement des partitions…</p>';
         try {
-            const top = (await gh(f)) || [];
+            const [top, order] = await Promise.all([gh(f).then(r => r || []), readOrder(f)]);
             const files = top.filter(it => it.type === 'file' && /\.pdf$/i.test(it.name)).sort(byName);
-            const dirs = await Promise.all(top.filter(it => it.type === 'dir').sort(byName).map(async d => ({
+            const dirs = await Promise.all(top.filter(it => it.type === 'dir').map(async d => ({
                 name: d.name,
                 path: d.path,
                 files: ((await gh(d.path)) || []).filter(it => it.type === 'file' && /\.pdf$/i.test(it.name)).sort(byName),
             })));
-            box._tree = { dirs: dirs.filter(d => d.files.length), files };
+            box._orderSha = order.sha;
+            box._tree = { dirs: applyOrder(dirs.filter(d => d.files.length), order.names), files };
             render(box);
         } catch (e) {
             list.innerHTML = '<p class="members-empty"><i class="fas fa-triangle-exclamation"></i> Impossible de charger les partitions pour le moment.</p>';
@@ -126,11 +181,17 @@ window.DLBPartitions = (() => {
             return;
         }
         const openSet = box._open || new Set();
-        list.innerHTML = dirs.map(d => `
-            <details class="part-folder" data-dir="${esc(d.path)}"${q || openSet.has(d.path) ? ' open' : ''}>
+        const sortable = !!write && !q && dirs.length > 1;  // réordonner : éditeur, sans recherche en cours
+        list.innerHTML = dirs.map((d, i) => `
+            <details class="part-folder${sortable ? ' sortable' : ''}" data-dir="${esc(d.path)}"${sortable ? ' draggable="true"' : ''}${q || openSet.has(d.path) ? ' open' : ''}>
                 <summary>
+                    ${sortable ? '<span class="part-grip" title="Glisser pour déplacer"><i class="fas fa-grip-vertical"></i></span>' : ''}
                     <i class="fas fa-folder part-icon"></i><i class="fas fa-folder-open part-icon"></i>
                     <span class="part-meta"><strong>${esc(d.name)}</strong><small>${plural(d.files.length, 'partition')}</small></span>
+                    ${sortable ? `<span class="part-move">
+                        <button type="button" data-act="up" title="Monter"${i === 0 ? ' disabled' : ''}><i class="fas fa-arrow-up"></i></button>
+                        <button type="button" data-act="down" title="Descendre"${i === dirs.length - 1 ? ' disabled' : ''}><i class="fas fa-arrow-down"></i></button>
+                    </span>` : ''}
                     ${write ? `<button type="button" data-act="deldir" class="part-del part-deldir" title="Supprimer tout le morceau"><i class="fas fa-trash"></i></button>` : ''}
                     <i class="fas fa-chevron-down part-chevron"></i>
                 </summary>
@@ -140,6 +201,37 @@ window.DLBPartitions = (() => {
             box._open = box._open || new Set();
             det.open ? box._open.add(det.dataset.dir) : box._open.delete(det.dataset.dir);
         }));
+        if (sortable) enableDrag(box, list);
+    }
+
+    // Glisser-déposer des morceaux dans la liste (éditeurs)
+    function enableDrag(box, list) {
+        let dragged = null;
+        list.querySelectorAll('.part-folder.sortable').forEach(det => {
+            det.addEventListener('dragstart', e => {
+                dragged = det;
+                det.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', det.dataset.dir);
+            });
+            det.addEventListener('dragend', () => {
+                det.classList.remove('dragging');
+                if (!dragged) return;
+                dragged = null;
+                // nouvel ordre = ordre des dossiers à l'écran
+                const paths = [...list.querySelectorAll('.part-folder')].map(x => x.dataset.dir);
+                const before = box._tree.dirs.map(d => d.path).join('|');
+                box._tree.dirs.sort((a, b) => paths.indexOf(a.path) - paths.indexOf(b.path));
+                if (box._tree.dirs.map(d => d.path).join('|') !== before) { render(box); saveOrderSoon(box); }
+            });
+            det.addEventListener('dragover', e => {
+                if (!dragged || dragged === det) return;
+                e.preventDefault();
+                const r = det.getBoundingClientRect();
+                det.parentNode.insertBefore(dragged, e.clientY < r.top + r.height / 2 ? det : det.nextSibling);
+            });
+            det.addEventListener('drop', e => { if (dragged) e.preventDefault(); });
+        });
     }
 
     function armConfirm(btn) {  // confirmation en deux clics, sans fenêtre bloquante
@@ -153,6 +245,13 @@ window.DLBPartitions = (() => {
 
     async function onAction(box, btn) {
         const act = btn.dataset.act;
+
+        if (act === 'up' || act === 'down') {
+            const path = btn.closest('.part-folder').dataset.dir;
+            const i = box._tree.dirs.findIndex(d => d.path === path);
+            moveDir(box, i, act === 'up' ? i - 1 : i + 1);
+            return;
+        }
 
         if (act === 'deldir') {
             if (!armConfirm(btn)) return;
@@ -413,7 +512,7 @@ window.DLBPartitions = (() => {
             box.querySelector('.part-list').addEventListener('click', e => {
                 const btn = e.target.closest('button[data-act]');
                 if (!btn) return;
-                if (btn.dataset.act === 'deldir') e.preventDefault();  // ne pas replier le dossier
+                if (['deldir', 'up', 'down'].includes(btn.dataset.act)) e.preventDefault();  // ne pas replier le dossier
                 onAction(box, btn);
             });
         });

@@ -773,3 +773,10 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 .part-folder-files .part-item { background: var(--cream); }
 .part-deldir { font: 600 .84rem var(--font-body); cursor: pointer; padding: 8px 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--cream); color: var(--text); }
 .part-pick i { font-size: 1em; color: inherit; }
+.part-grip { color: var(--muted); cursor: grab; padding: 4px 2px; font-size: 1rem; }
+.part-folder.sortable[draggable="true"]:active .part-grip { cursor: grabbing; }
+.part-folder.dragging { opacity: .45; border-style: dashed; border-color: var(--red); }
+.part-move { display: inline-flex; gap: 4px; }
+.part-move button { font: inherit; cursor: pointer; width: 34px; height: 34px; border-radius: 9px; border: 2px solid var(--line); background: var(--cream); color: var(--text); }
+.part-move button:hover:not(:disabled) { border-color: var(--red); color: var(--red-sh); }
+.part-move button:disabled { opacity: .35; cursor: default; }
