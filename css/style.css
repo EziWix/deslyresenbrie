@@ -270,6 +270,9 @@ a { color: inherit; text-decoration: none; }
 
 /* ---------- Cartes ---------- */
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px; }
+.cards-3 { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 860px) { .cards-3 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .cards-3 { grid-template-columns: 1fr; } }
 .card {
     position: relative; background: var(--white); border-radius: var(--radius); padding: 28px 26px 26px;
     border: 2px solid var(--line); box-shadow: 0 6px 0 var(--cream-2);
