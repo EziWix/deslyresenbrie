@@ -207,6 +207,50 @@ function eventHTML(ev, past, isNext) {
         </article>`;
 }
 
+/* Page agenda : dates regroupées par formation (pastille date + titre + lieu) */
+const FORMATIONS = [
+    { type: 'Harmonie', label: 'Harmonie', icon: 'fa-music' },
+    { type: 'Marching band', label: 'Marching Band', icon: 'fa-drum' },
+    { type: 'Fanfare', label: 'Fanfare', icon: 'fa-bullhorn' },
+    { type: 'Animation', label: 'Animations', icon: 'fa-star' },
+];
+
+function agendaItemHTML(ev, past) {
+    const d = parseDate(ev.date);
+    const lieu = [ev.lieu, ev.ville].filter(Boolean).join(', ');
+    const titre = ev.lien
+        ? `<a href="${ev.lien}" target="_blank" rel="noopener">${ev.titre} <i class="fas fa-arrow-up-right-from-square" style="font-size:.7em"></i></a>`
+        : ev.titre;
+    return `
+        <article class="agenda-item reveal${past ? ' past' : ''}">
+            <div class="agenda-badge">
+                <span class="agenda-day">${d.getDate()}</span>
+                <span class="agenda-month">${MOIS[d.getMonth()]}</span>
+                <span class="agenda-year">${d.getFullYear()}</span>
+            </div>
+            <div class="agenda-info">
+                <h4>${titre}${ev.aConfirmer && !past ? ' <span class="event-tag event-tbc"><i class="fas fa-circle-question"></i> À confirmer</span>' : ''}</h4>
+                ${lieu ? `<p><i class="fas fa-location-dot"></i>${lieu}</p>` : ''}
+                ${ev.heure ? `<p><i class="fas fa-clock"></i>${ev.heure}</p>` : ''}
+            </div>
+        </article>`;
+}
+
+function agendaGroupsHTML(list, past) {
+    const known = FORMATIONS.map(f => f.type);
+    const groups = FORMATIONS.concat(
+        [...new Set(list.map(e => e.type || 'Autres').filter(t => !known.includes(t)))].map(t => ({ type: t, label: t, icon: 'fa-calendar-day' })));
+    return groups.map(g => {
+        const items = list.filter(e => (e.type || 'Autres') === g.type);
+        if (!items.length) return '';
+        return `
+            <div class="agenda-group">
+                <h3 class="agenda-group-title"><i class="fas ${g.icon}"></i> ${g.label}</h3>
+                <div class="agenda-list">${items.map(ev => agendaItemHTML(ev, past)).join('')}</div>
+            </div>`;
+    }).join('');
+}
+
 function emptyHTML(text) {
     return `<div class="events-empty"><i class="far fa-calendar"></i>${text}</div>`;
 }
@@ -270,13 +314,13 @@ function renderEvents() {
     const up = document.getElementById('upcomingEvents');
     if (up) {
         up.innerHTML = upcoming.length
-            ? upcoming.map((ev, i) => eventHTML(ev, false, i === 0)).join('')
+            ? agendaGroupsHTML(upcoming, false)
             : emptyHTML('Aucune date annoncée pour le moment. Suivez-nous sur Facebook pour être prévenus.');
     }
     const pastBox = document.getElementById('pastEvents');
     if (pastBox) {
         const block = document.getElementById('pastBlock');
-        if (past.length) pastBox.innerHTML = past.map(ev => eventHTML(ev, true, false)).join('');
+        if (past.length) pastBox.innerHTML = agendaGroupsHTML(past, true);
         else if (block) block.hidden = true;
     }
 }

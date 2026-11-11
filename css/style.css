@@ -816,3 +816,22 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 .part-move button:disabled { opacity: .35; cursor: default; }
 .part-folder-files .part-folder { background: var(--cream); }
 .part-folder-files .part-folder .part-folder-files .part-item { background: var(--white); }
+
+/* Agenda : dates regroupées par formation */
+.agenda-group { display: grid; gap: 14px; margin-bottom: 26px; }
+.agenda-group-title { display: flex; align-items: center; gap: 12px; font-family: var(--font-title); font-weight: 400; font-size: 1.4rem; margin: 0 0 4px; }
+.agenda-group-title i { color: var(--red); font-size: 1.1em; }
+.agenda-list { display: grid; gap: 14px; }
+.agenda-item { display: flex; align-items: center; gap: 18px; padding: 16px 18px; background: var(--white); border-radius: 14px; border: 2px solid var(--line); box-shadow: 0 5px 0 var(--cream-2); transition: transform .25s var(--ease), border-color .2s; }
+.agenda-item:hover { transform: translateY(-3px); border-color: rgba(227, 19, 31, .4); }
+.agenda-badge { flex-shrink: 0; width: 64px; padding: 8px 0; border-radius: 10px; background: linear-gradient(160deg, var(--red), var(--red-sh)); color: var(--white); display: flex; flex-direction: column; align-items: center; line-height: 1.05; }
+.agenda-day { font-family: var(--font-title); font-size: 1.7rem; }
+.agenda-month { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.agenda-year { font-size: .7rem; opacity: .85; }
+.agenda-info { min-width: 0; }
+.agenda-info h4 { margin: 0 0 4px; font-size: 1.08rem; font-weight: 700; }
+.agenda-info h4 .event-tag { font-size: .7rem; vertical-align: middle; margin-left: 6px; }
+.agenda-info p { margin: 2px 0 0; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .92rem; }
+.agenda-info p i { color: var(--red); width: 14px; text-align: center; }
+.agenda-item.past { opacity: .7; }
+.agenda-item.past .agenda-badge { background: var(--muted); }
