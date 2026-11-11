@@ -281,7 +281,7 @@ function renderInfo(inst) {
             <div><dt><i class="fas fa-music"></i> Rôle dans l'orchestre</dt><dd>${inst.role}</dd></div>
             <div><dt><i class="fas fa-lightbulb"></i> Le saviez-vous ?</dt><dd>${inst.anecdote}</dd></div>
         </dl>
-        <a href="association.html#rejoindre" class="btn btn-dark">J'ai envie d'en jouer <i class="fas fa-arrow-right"></i></a>`;
+        <a href="association#rejoindre" class="btn btn-dark">J'ai envie d'en jouer <i class="fas fa-arrow-right"></i></a>`;
 }
 
 function visibleList() {

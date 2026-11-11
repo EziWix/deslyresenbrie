@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 
 SITE = Path(__file__).resolve().parent.parent
-VERSION = 35  # à incrémenter quand style.css, data.js ou main.js changent (cache des navigateurs)
+VERSION = 36  # à incrémenter quand style.css, data.js ou main.js changent (cache des navigateurs)
 
 NAV = [
     ("index.html", "fa-house", "Accueil"),
@@ -127,6 +127,15 @@ def footer(extra_scripts):
 """
 
 
+PAGES = "agenda|association|contact|galerie|instruments|livre-dor|membres"
+
+
+def clean_links(html):
+    """Adresses sans « .html » (GitHub Pages sert /agenda comme agenda.html)."""
+    html = re.sub(r'href="index\.html', 'href="./', html)
+    return re.sub(rf'href="({PAGES})\.html', r'href="\1', html)
+
+
 def rebuild(path):
     src = path.read_text(encoding="utf-8")
     title = re.search(r"<title>(.*?)</title>", src, re.S).group(1).strip()
@@ -136,8 +145,9 @@ def rebuild(path):
     tail = src[src.index("</main>"):]
     scripts = [s for s in re.findall(r"<script\b.*?</script>", tail, re.S)
                if "js/data.js" not in s and "js/main.js" not in s]
-    path.write_text(head(title, desc, robots) + header(path.name) + "    <main>" + main + "</main>\n"
-                    + footer(scripts), encoding="utf-8", newline="\n")
+    page = head(title, desc, robots) + header(path.name) + "    <main>" + main + "</main>\n" + footer(scripts)
+    page = clean_links(page)
+    path.write_text(page, encoding="utf-8", newline="\n")
     return len(scripts)
 
 
