@@ -787,12 +787,12 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 .part-cat { border: 2px solid var(--line); border-radius: 14px; background: var(--cream); transition: border-color .2s, background .2s; }
 .part-cat.drop-over { border-color: var(--red); background: #ffeeed; }
 .part-cat-head { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; user-select: none;
-    background: linear-gradient(135deg, var(--red), var(--red-sh)); color: var(--white); border-radius: 12px; }
+    background: linear-gradient(135deg, #2b1317, #0f0809); color: var(--white); border-radius: 12px; border-left: 5px solid var(--red); }
 .part-cat.open > .part-cat-head { border-radius: 12px 12px 0 0; margin-bottom: 12px; }
 .part-cat-head:hover { filter: brightness(1.08); }
 .part-cat-chev { color: rgba(255, 255, 255, .85); transition: transform .3s var(--ease); }
 .part-cat.open .part-cat-chev { transform: rotate(90deg); }
-.part-cat-icon { font-size: 1.3rem; color: var(--white); }
+.part-cat-icon { font-size: 1.3rem; color: var(--red-hi); }
 .part-cat-head .part-cat-title small { color: rgba(255, 255, 255, .8); }
 .part-cat-head .part-move button, .part-cat-head .part-ren, .part-cat-head .part-deldir { background: rgba(255, 255, 255, .95); border-color: transparent; }
 .part-cat-head .part-rename { color: var(--text); }
