@@ -835,3 +835,17 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 .agenda-info p i { color: var(--red); width: 14px; text-align: center; }
 .agenda-item.past { opacity: .7; }
 .agenda-item.past .agenda-badge { background: var(--muted); }
+
+/* Bureau (5 cartes) : 3 en haut, 2 centrées en bas */
+.cards-bureau { grid-template-columns: repeat(6, 1fr); }
+.cards-bureau > * { grid-column: span 2; }
+.cards-bureau > :nth-child(4) { grid-column: 2 / span 2; }
+@media (max-width: 860px) {
+    .cards-bureau { grid-template-columns: repeat(4, 1fr); }
+    .cards-bureau > :nth-child(4) { grid-column: span 2; }
+    .cards-bureau > :nth-child(5) { grid-column: 2 / span 2; }
+}
+@media (max-width: 520px) {
+    .cards-bureau { grid-template-columns: 1fr; }
+    .cards-bureau > *, .cards-bureau > :nth-child(4), .cards-bureau > :nth-child(5) { grid-column: auto; }
+}
