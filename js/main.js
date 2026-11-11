@@ -2,6 +2,11 @@
    Des Lyres en Brie — scripts communs
    ========================================================= */
 
+// Adresse propre : « …/index.html » s'affiche « …/ » (anciens liens, favoris)
+if (/\/index\.html$/.test(location.pathname)) {
+    history.replaceState(null, '', location.pathname.replace(/index\.html$/, '') + location.search + location.hash);
+}
+
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const FINE_POINTER = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 

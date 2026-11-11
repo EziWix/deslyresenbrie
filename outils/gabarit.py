@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 
 SITE = Path(__file__).resolve().parent.parent
-VERSION = 34  # à incrémenter quand style.css, data.js ou main.js changent (cache des navigateurs)
+VERSION = 35  # à incrémenter quand style.css, data.js ou main.js changent (cache des navigateurs)
 
 NAV = [
     ("index.html", "fa-house", "Accueil"),
@@ -51,13 +51,13 @@ def head(title, desc, robots):
 
 def header(page):
     links = "\n".join(
-        f'                <a href="{href}" class="nav-link{" active" if href == page else ""}"><i class="fas {icon}"></i> {label}</a>'
+        f'                <a href="{"./" if href == "index.html" else href}" class="nav-link{" active" if href == page else ""}"><i class="fas {icon}"></i> {label}</a>'
         for href, icon, label in NAV)
     act = lambda p: " active" if p == page else ""
     return f"""    <div class="scroll-progress" id="scrollProgress"></div>
     <header class="site-header" id="header">
         <div class="header-inner">
-            <a href="index.html" class="logo" aria-label="Des Lyres en Brie - accueil">
+            <a href="./" class="logo" aria-label="Des Lyres en Brie - accueil">
                 <img class="logo-mark" src="images/logo-mark.png" alt="" width="57" height="42">
                 <span class="logo-text">Des Lyres <em>en Brie</em></span>
             </a>
@@ -84,7 +84,7 @@ def footer(extra_scripts):
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-about">
-                    <a href="index.html" aria-label="Des Lyres en Brie - accueil"><img class="footer-logo" src="images/logo.webp" alt="Des Lyres en Brie" width="150" height="186" loading="lazy"></a>
+                    <a href="./" aria-label="Des Lyres en Brie - accueil"><img class="footer-logo" src="images/logo.webp" alt="Des Lyres en Brie" width="150" height="186" loading="lazy"></a>
                     <p>Association musicale loi 1901 : faire vivre la musique en Brie, ensemble.</p>
                     <div class="socials">
                         <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
