@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 
 SITE = Path(__file__).resolve().parent.parent
-VERSION = 36  # à incrémenter quand style.css, data.js ou main.js changent (cache des navigateurs)
+VERSION = 37  # à incrémenter quand style.css, data.js ou main.js changent (cache des navigateurs)
 
 NAV = [
     ("index.html", "fa-house", "Accueil"),
@@ -85,7 +85,7 @@ def footer(extra_scripts):
             <div class="footer-grid">
                 <div class="footer-about">
                     <a href="./" aria-label="Des Lyres en Brie - accueil"><img class="footer-logo" src="images/logo.webp" alt="Des Lyres en Brie" width="150" height="186" loading="lazy"></a>
-                    <p>Association musicale loi 1901 : faire vivre la musique en Brie, ensemble.</p>
+                    <p>Association musicale loi 1901 née en Brie : nous faisons vivre la musique ici et partout où l'on nous invite.</p>
                     <div class="socials">
                         <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
