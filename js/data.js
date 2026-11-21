@@ -15,8 +15,6 @@ const EVENTS = [
     { date: "2026-10-31", heure: "10h – 12h", titre: "Prestation du marching band", ville: "La Ferté-sous-Jouarre", type: "Marching band" },
     { date: "2026-11-08", titre: "Concert de l'harmonie (CMF)", ville: "Beaumont-sur-Oise (95)", type: "Harmonie" },
     { date: "2026-11-21", titre: "Concert de la Sainte-Cécile", ville: "Saint-Jean-les-Deux-Jumeaux", type: "Harmonie" },
-    { date: "2026-11-28", heure: "17h00 – 18h45", titre: "Prestation du marching band", ville: "Mareuil-lès-Meaux", type: "Marching band" },
-    { date: "2026-11-28", titre: "Concert de la Sainte-Cécile", ville: "Boissy-le-Châtel", type: "Harmonie" },
     { date: "2026-12-04", titre: "Illuminations", ville: "La Ferté-sous-Jouarre", type: "Marching band" },
     { date: "2026-12-05", titre: "Téléthon", ville: "Boissy-le-Châtel", type: "Marching band" },
     { date: "2026-12-19", heure: "En soirée", titre: "Concert", ville: "Trélou-sur-Marne (02)", type: "Harmonie" },
