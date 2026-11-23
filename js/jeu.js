@@ -148,23 +148,19 @@
     function spawnObstacles(level) {
         const roll = Math.random();
         const y = -70;
-        if (roll < .22) {                           // plots
+        if (roll < .26) {                           // plots
             const n = 1 + Math.floor(rand(0, 1.6 + level));
             for (let i = 0; i < Math.min(n, 4); i++) g.objs.push({ type: 'cone', x: freeX(16), y: y - i * rand(0, 40), r: 11 });
-        } else if (roll < .38) {                    // flaque
+        } else if (roll < .44) {                    // flaque
             g.objs.push({ type: 'flaque', x: freeX(40), y, w: rand(54, 80), h: 26 });
-        } else if (roll < .58) {                    // barrière Vauban avec un passage
+        } else if (roll < .66) {                    // barrière Vauban avec un passage
             const gap = clamp(150 - level * 22, 104, 150);
             const gx = rand(ROAD_L + 10, ROAD_R - 10 - gap);
             if (gx - ROAD_L > 8) g.objs.push({ type: 'barriere', x: ROAD_L, y, w: gx - ROAD_L, h: 14 });
             if (ROAD_R - (gx + gap) > 8) g.objs.push({ type: 'barriere', x: gx + gap, y, w: ROAD_R - gx - gap, h: 14 });
-        } else if (roll < .72) {                    // voiture garée contre le trottoir
+        } else if (roll < .84) {                    // voiture garée contre le trottoir
             const left = Math.random() < .5;
             g.objs.push({ type: 'voiture', x: left ? ROAD_L + 4 : ROAD_R - 54, y: y - 40, w: 50, h: 90, color: pick(['#2f6fb5', '#ececec', '#3b3b3b', '#3b9a5b', '#f2c14e']) });
-        } else if (roll < .86) {                    // pigeons qui se baladent
-            const n = 3 + Math.floor(rand(0, 3));
-            const cx = freeX(60);
-            for (let i = 0; i < n; i++) g.objs.push({ type: 'pigeon', x: cx + rand(-40, 40), y: y + rand(-30, 30), r: 7, vx: rand(-45, 45), ph: Math.random() * 6 });
         } else {                                     // vélo qui traverse
             const fromLeft = Math.random() < .5;
             g.objs.push({ type: 'velo', x: fromLeft ? ROAD_L - 50 : ROAD_R + 10, y: y - 120, w: 40, h: 16, vx: (fromLeft ? 1 : -1) * rand(70, 110 + level * 30) });
@@ -288,7 +284,6 @@
             o.y += dy;
             if (o.vx) {
                 o.x += o.vx * dt;
-                if (o.type === 'pigeon' && (o.x < ROAD_L + 10 || o.x > ROAD_R - 10)) o.vx *= -1;
             }
         }
         for (const d of g.decor) d.y += dy;
@@ -472,17 +467,6 @@
                 ctx.fillStyle = 'rgba(255,255,255,.22)'; roundRect(o.x + 8, y + 38, o.w - 16, o.h - 70, 5); ctx.fill();
                 ctx.fillStyle = '#ffe9a8'; ctx.fillRect(o.x + 5, y + 2, 9, 4); ctx.fillRect(o.x + o.w - 14, y + 2, 9, 4);
                 break;
-            case 'pigeon': {
-                const flap = Math.sin(g.t * 14 + o.ph) * 2;
-                ctx.translate(x, y); ctx.scale(o.vx < 0 ? -1 : 1, 1);
-                ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(2, 3, 8, 5, 0, 0, 7); ctx.fill();
-                ctx.fillStyle = '#8d93a0'; ctx.beginPath(); ctx.ellipse(0, 0, 8, 5.5, 0, 0, 7); ctx.fill();
-                ctx.fillStyle = '#6e7380'; ctx.beginPath(); ctx.ellipse(-1, -4 - flap, 5, 2.5, -.3, 0, 7); ctx.fill();
-                ctx.beginPath(); ctx.ellipse(-1, 4 + flap, 5, 2.5, .3, 0, 7); ctx.fill();
-                ctx.fillStyle = '#5a6b7a'; ctx.beginPath(); ctx.arc(7, 0, 3.5, 0, 7); ctx.fill();
-                ctx.fillStyle = '#f2a83b'; ctx.beginPath(); ctx.moveTo(10, -1); ctx.lineTo(13, 0); ctx.lineTo(10, 1); ctx.fill();
-                break;
-            }
             case 'velo':
                 ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(o.x + 3, y + 4, o.w, o.h);
                 ctx.fillStyle = '#222'; ctx.fillRect(o.x, y + 6, o.w, 4);
@@ -758,6 +742,25 @@
 
     document.addEventListener('visibilitychange', () => { if (document.hidden) setPause(true); });
     window.addEventListener('blur', () => setPause(true));
+
+    // ---------- Plein écran ----------
+    const stage = $('paradeStage'), btnFull = $('paradeFull');
+    const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+    if (!(stage.requestFullscreen || stage.webkitRequestFullscreen)) {
+        btnFull.hidden = true; // iPhone : pas de plein écran pour un élément de page
+    } else {
+        btnFull.addEventListener('click', () => {
+            const req = stage.requestFullscreen || stage.webkitRequestFullscreen;
+            Promise.resolve(req.call(stage)).catch(() => { });
+        });
+        $('paradeExitFull').addEventListener('click', () => {
+            const exit = document.exitFullscreen || document.webkitExitFullscreen;
+            if (fsElement()) Promise.resolve(exit.call(document)).catch(() => { });
+        });
+        const onFs = () => requestAnimationFrame(resize);
+        document.addEventListener('fullscreenchange', onFs);
+        document.addEventListener('webkitfullscreenchange', onFs);
+    }
 
     resize();
     // les polices du titre arrivent après le premier dessin

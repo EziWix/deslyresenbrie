@@ -851,9 +851,19 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 }
 
 /* ---------- Jeu : La Grande Parade ---------- */
-.parade-section { padding-top: 70px; }
-.parade-layout { display: grid; grid-template-columns: auto minmax(0, 420px); gap: 48px; justify-content: center; align-items: start; }
-.parade-col { width: min(100%, 440px, calc((100svh - 150px) * .6)); margin: 0 auto; }
+.parade-section { padding-top: 40px; }
+.page-banner-compact { padding-bottom: 46px; }
+.parade-layout { display: grid; grid-template-columns: auto minmax(0, 380px); gap: 44px; justify-content: center; align-items: start; }
+.parade-col { width: min(100%, 600px, calc((100svh - 110px) * .6)); margin: 0 auto; }
+.parade-stage { position: relative; }
+.parade-exit-full { display: none; }
+.parade-stage:fullscreen { display: flex; align-items: center; justify-content: center; background: var(--ink); padding: 0; }
+.parade-stage:fullscreen .parade-wrap { height: 100%; width: auto; max-width: 100%; border: 0; border-radius: 0; box-shadow: none; }
+.parade-stage:fullscreen .parade-exit-full {
+    display: grid; place-items: center; position: absolute; right: 16px; bottom: 16px; width: 48px; height: 48px;
+    border: 0; border-radius: 14px; background: rgba(255, 255, 255, .14); color: #fff; font-size: 1.1rem; cursor: pointer;
+}
+.parade-stage:fullscreen .parade-exit-full:hover { background: rgba(255, 255, 255, .25); }
 .parade-wrap {
     position: relative; width: 100%; aspect-ratio: 3 / 5;
     border-radius: 26px; overflow: hidden; background: var(--ink);
