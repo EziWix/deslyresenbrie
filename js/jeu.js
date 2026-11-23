@@ -328,14 +328,6 @@
                 if (state !== 'play') return;
                 continue;
             }
-            for (let j = pos.length - 1; j >= 0; j--) {
-                if (touches(o, pos[j].x, pos[j].y, R)) {
-                    o.done = true;
-                    loseMusician(pos[j].i, pos[j].x, pos[j].y);
-                    break;
-                }
-            }
-            if (state !== 'play') return;
         }
         g.objs = g.objs.filter(o => o.y < H + 120 && !(o.done && o.bonus) && (!o.vx || (o.x > ROAD_L - 80 && o.x < ROAD_R + 80)));
 
