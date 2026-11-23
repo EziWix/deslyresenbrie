@@ -67,4 +67,4 @@ const WEB3FORMS_KEY = "";
    Installation expliquée en haut de outils/classement-apps-script.gs.
    Tant qu'elle est vide, le classement n'apparaît pas.
 */
-const CLASSEMENT_URL = "";
+const CLASSEMENT_URL = "https://script.google.com/macros/s/AKfycbzGCCoLnuYByTmV8D2X0AY-sOxsxoVnFBMJ6NQp_o1QbYcBkZ6NhVJbfTr_7jUXlr7e/exec";

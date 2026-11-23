@@ -18,12 +18,14 @@
  * (crayon) > Version : Nouvelle version (l'URL reste la même).
  */
 
+// identifiant de la feuille « Classement Parade » (dans son adresse : /spreadsheets/d/<ID>/edit)
+const ID_FEUILLE = '1k4nY_V3zA7PEoHTmAbltcJcr14jNKd-ulsOmCCKOYDU';
 const ONGLET = 'Scores';
 const TOP = 20;
 const MOTS_INTERDITS = ['merde', 'pute', 'putain', 'connard', 'conard', 'salope', 'encule', 'nique', 'batard', 'bite', 'couille', 'nazi', 'hitler', 'fdp', 'ntm', 'pd'];
 
 function feuille_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.getActiveSpreadsheet() || SpreadsheetApp.openById(ID_FEUILLE);
   let sh = ss.getSheetByName(ONGLET);
   if (!sh) {
     sh = ss.insertSheet(ONGLET);
