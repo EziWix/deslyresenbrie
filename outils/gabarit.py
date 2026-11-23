@@ -20,7 +20,7 @@ NAV = [
     ("agenda.html", "fa-calendar-days", "Agenda"),
     ("galerie.html", "fa-images", "Galerie"),
     ("livre-dor.html", "fa-feather-pointed", "Livre d'or"),
-    ("jeu.html", "fa-gamepad", "Jeu"),
+    ("jeu.html", "fa-gamepad", "Jeux"),
 ]
 MAPS = "https://www.google.com/maps/search/?api=1&amp;query=Rue+des+Carri%C3%A8res+77169+Boissy-le-Ch%C3%A2tel"
 
