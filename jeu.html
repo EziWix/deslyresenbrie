@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Paytone+One&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=44">
+    <link rel="stylesheet" href="css/style.css?v=45">
 </head>
 <body>
     <div class="scroll-progress" id="scrollProgress"></div>
@@ -55,6 +55,18 @@
 
         <section class="section parade-section">
             <div class="container parade-layout">
+                <aside class="parade-rules">
+                    <h2>Comment <span>jouer&nbsp;?</span></h2>
+                    <ul>
+                        <li><i class="fas fa-arrows-left-right"></i><div><strong>Déplace le tambour-major</strong> avec les flèches (ou Q / D), ou en glissant le doigt sur l'écran.</div></li>
+                        <li><i class="fas fa-people-line"></i><div><strong>Les rangs suivent avec un temps de retard</strong> et passent sans risque : seul le tambour-major peut se cogner.</div></li>
+                        <li><i class="fas fa-triangle-exclamation"></i><div><strong>Plots, flaques, barrières, voitures, vélos</strong> : chaque obstacle que touche le tambour-major fait sortir un musicien du rang.</div></li>
+                        <li><i class="fas fa-music"></i><div><strong>Attrape les notes</strong> pour gagner des points, et la <strong>lyre +1</strong> pour recruter un musicien.</div></li>
+                        <li><i class="fas fa-star"></i><div><strong>Reste bien aligné</strong> : une troupe droite fait monter le multiplicateur jusqu'à ×4.</div></li>
+                        <li><i class="fas fa-flag-checkered"></i><div>Plus tu avances, plus ça va vite. Combien de villes de la Brie traverseras-tu ?</div></li>
+                    </ul>
+                </aside>
+
                 <div class="parade-col">
                     <div class="parade-stage" id="paradeStage">
                     <div class="parade-wrap">
@@ -100,25 +112,11 @@
                     </div>
                 </div>
 
-                <div class="parade-side">
                 <section class="parade-board" id="paradeBoard" hidden>
                     <h2>Le <span>classement</span></h2>
                     <ol class="parade-top" id="paradeTop"><li class="parade-top-empty">Chargement…</li></ol>
                     <p class="parade-board-foot" id="paradeBoardFoot"></p>
                 </section>
-
-                <aside class="parade-rules">
-                    <h2>Comment <span>jouer&nbsp;?</span></h2>
-                    <ul>
-                        <li><i class="fas fa-arrows-left-right"></i><div><strong>Déplace le tambour-major</strong> avec les flèches (ou Q / D), ou en glissant le doigt sur l'écran.</div></li>
-                        <li><i class="fas fa-people-line"></i><div><strong>Les rangs suivent avec un temps de retard</strong> et passent sans risque : seul le tambour-major peut se cogner.</div></li>
-                        <li><i class="fas fa-triangle-exclamation"></i><div><strong>Plots, flaques, barrières, voitures, vélos</strong> : chaque obstacle que touche le tambour-major fait sortir un musicien du rang.</div></li>
-                        <li><i class="fas fa-music"></i><div><strong>Attrape les notes</strong> pour gagner des points, et la <strong>lyre +1</strong> pour recruter un musicien.</div></li>
-                        <li><i class="fas fa-star"></i><div><strong>Reste bien aligné</strong> : une troupe droite fait monter le multiplicateur jusqu'à ×4.</div></li>
-                        <li><i class="fas fa-flag-checkered"></i><div>Plus tu avances, plus ça va vite. Combien de villes de la Brie traverseras-tu ?</div></li>
-                    </ul>
-                </aside>
-                </div>
             </div>
         </section>
     </main>
@@ -164,8 +162,8 @@
 
     <button class="to-top" id="toTop" type="button" aria-label="Revenir en haut de la page"><i class="fas fa-arrow-up"></i></button>
 
-    <script src="js/data.js?v=44"></script>
+    <script src="js/data.js?v=45"></script>
     <script src="js/jeu.js?v=4"></script>
-    <script src="js/main.js?v=44"></script>
+    <script src="js/main.js?v=45"></script>
 </body>
 </html>

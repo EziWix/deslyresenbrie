@@ -853,7 +853,11 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 /* ---------- Jeu : La Grande Parade ---------- */
 .parade-section { padding-top: 40px; }
 .page-banner-compact { padding-bottom: 46px; }
-.parade-layout { display: grid; grid-template-columns: auto minmax(0, 380px); gap: 44px; justify-content: center; align-items: start; }
+.parade-layout { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 36px; align-items: start; }
+.container.parade-layout { width: min(1400px, 100% - 32px); }
+.parade-layout > .parade-rules, .parade-layout > .parade-board { max-width: 340px; width: 100%; }
+.parade-layout > .parade-rules { justify-self: end; }
+.parade-layout > .parade-board { justify-self: start; }
 .parade-col { width: min(100%, 600px, calc((100svh - 110px) * .6)); margin: 0 auto; }
 .parade-stage { position: relative; }
 .parade-exit-full { display: none; }
@@ -898,13 +902,19 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 .parade-rules li { display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: start; color: var(--muted); font-size: .96rem; line-height: 1.55; }
 .parade-rules li strong { color: var(--text); }
 .parade-rules li i { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--cream-2); color: var(--red); font-size: 1.05rem; }
+@media (max-width: 1180px) {
+    .parade-layout { grid-template-columns: 1fr; gap: 32px; }
+    .parade-layout > .parade-rules, .parade-layout > .parade-board { justify-self: center; max-width: 600px; }
+    .parade-col { order: 1; }
+    .parade-layout > .parade-board { order: 2; }
+    .parade-layout > .parade-rules { order: 3; }
+}
 @media (max-width: 900px) {
-    .parade-layout { grid-template-columns: 1fr; gap: 40px; }
+    .parade-layout { gap: 40px; }
     .parade-section { padding-top: 40px; }
     .parade-rules { padding: 28px 22px; }
 }
 /* classement */
-.parade-side { display: grid; gap: 28px; align-content: start; }
 .parade-board { background: var(--ink); color: var(--on-dark); border-radius: var(--radius); padding: 30px 28px 24px; box-shadow: 0 8px 0 var(--red-sh), var(--shadow); }
 .parade-board[hidden] { display: none; }
 .parade-board h2 { font-family: var(--font-title); font-weight: 400; text-transform: uppercase; font-size: clamp(1.6rem, 3.4vw, 2.2rem); line-height: 1.05; margin-bottom: 18px; }
