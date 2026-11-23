@@ -87,10 +87,12 @@ function doPost(e) {
 
   if (!pseudoValide_(pseudo)) return json_({ ok: false, erreur: 'Pseudo refusé (2 à 16 lettres ou chiffres, et poli !).' });
   if (![score, metres, notes, duree].every(v => isFinite(v) && v >= 0)) return json_({ ok: false, erreur: 'Score invalide.' });
-  // garde-fous contre les scores inventés : vitesse max ≈ 19,5 m/s, multiplicateur max ×4
+  // garde-fous contre les scores inventés (calculés sur les règles du jeu, avec de la marge) :
+  // vitesse max ≈ 19,5 m/s ; au plus 5 notes tous les 7 m ; multiplicateur max ×4 ;
+  // une lyre au plus tous les 7 m (400 points max quand la troupe est complète)
   const plausible = metres <= duree * 20 + 20
-    && notes <= metres / 3 + 5
-    && score <= metres * 4 + notes * 40 + 4000;
+    && notes <= metres * 0.75 + 10
+    && score <= metres * 4 + notes * 40 + (metres / 7) * 400 + 1000;
   if (!plausible || score > 10000000) return json_({ ok: false, erreur: 'Score refusé.' });
 
   const verrou = LockService.getScriptLock();
