@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Grande Parade - Des Lyres en Brie</title>
+    <meta name="description" content="La Grande Parade : guide le marching band de Des Lyres en Brie à travers les rues de la Brie, garde la troupe alignée et évite les obstacles.">
+    <meta name="theme-color" content="#16090b">
+    <meta property="og:title" content="La Grande Parade - Des Lyres en Brie">
+    <meta property="og:description" content="La Grande Parade : guide le marching band de Des Lyres en Brie à travers les rues de la Brie, garde la troupe alignée et évite les obstacles.">
+    <meta property="og:image" content="images/logo.png">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="192x192" href="images/favicon-192.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Paytone+One&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css?v=41">
+</head>
+<body>
+    <div class="scroll-progress" id="scrollProgress"></div>
+    <header class="site-header" id="header">
+        <div class="header-inner">
+            <a href="./" class="logo" aria-label="Des Lyres en Brie - accueil">
+                <img class="logo-mark" src="images/logo-mark.png" alt="" width="57" height="42">
+                <span class="logo-text">Des Lyres <em>en Brie</em></span>
+            </a>
+            <nav class="main-nav" id="mainNav">
+                <a href="./" class="nav-link"><i class="fas fa-house"></i> Accueil</a>
+                <a href="association" class="nav-link"><i class="fas fa-people-group"></i> L'association</a>
+                <a href="instruments" class="nav-link"><i class="fas fa-drum"></i> Instruments</a>
+                <a href="agenda" class="nav-link"><i class="fas fa-calendar-days"></i> Agenda</a>
+                <a href="galerie" class="nav-link"><i class="fas fa-images"></i> Galerie</a>
+                <a href="livre-dor" class="nav-link"><i class="fas fa-feather-pointed"></i> Livre d'or</a>
+                <a href="jeu" class="nav-link active"><i class="fas fa-gamepad"></i> Jeu</a>
+                <span class="nav-actions">
+                    <a href="membres" class="nav-btn nav-btn-ghost"><i class="fas fa-lock"></i> Membres</a>
+                    <a href="contact" class="nav-btn nav-btn-primary"><i class="fas fa-envelope"></i> Contact</a>
+                </span>
+            </nav>
+            <button class="hamburger" id="hamburger" aria-label="Ouvrir le menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-banner wave-bottom">
+            <div class="container">
+                <h1><i class="fas fa-gamepad"></i>La Grande Parade</h1>
+                <p>Mène le marching band à travers la Brie sans perdre un seul musicien</p>
+            </div>
+        </section>
+
+        <section class="section parade-section">
+            <div class="container parade-layout">
+                <div class="parade-col">
+                    <div class="parade-wrap">
+                        <canvas id="parade" aria-label="Jeu : le marching band défile dans la rue"></canvas>
+
+                        <div class="parade-overlay" id="paradeStart">
+                            <img src="images/logo-mark.png" alt="" width="86" height="63">
+                            <h2>La Grande <span>Parade</span></h2>
+                            <p>Tu es le tambour-major. Guide la troupe de Boissy-le-Châtel jusqu'au bout de la Brie !</p>
+                            <button class="btn btn-primary" type="button" data-parade-start><i class="fas fa-play"></i> Lancer le défilé</button>
+                            <p class="parade-best" id="paradeBest"></p>
+                        </div>
+
+                        <div class="parade-overlay" id="paradePause" hidden>
+                            <h2>Pause</h2>
+                            <p>La fanfare reprend son souffle.</p>
+                            <button class="btn btn-primary" type="button" id="paradeResume"><i class="fas fa-play"></i> Reprendre</button>
+                        </div>
+
+                        <div class="parade-overlay" id="paradeOver" hidden>
+                            <h2>Fin de la <span>parade</span></h2>
+                            <p class="parade-score" id="paradeScore">0</p>
+                            <p class="parade-detail" id="paradeDetail"></p>
+                            <p class="parade-record" id="paradeRecord"></p>
+                            <button class="btn btn-primary" type="button" data-parade-start><i class="fas fa-rotate-right"></i> Rejouer</button>
+                            <a class="parade-join" href="association#rejoindre">Envie de défiler pour de vrai ? Rejoins-nous <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                    <div class="parade-controls">
+                        <button class="btn btn-dark" type="button" id="paradePauseBtn" disabled><i class="fas fa-pause"></i> Pause</button>
+                        <button class="btn btn-dark" type="button" id="paradeMusic" aria-pressed="true"><i class="fas fa-volume-high"></i> Musique</button>
+                    </div>
+                </div>
+
+                <aside class="parade-rules">
+                    <h2>Comment <span>jouer ?</span></h2>
+                    <ul>
+                        <li><i class="fas fa-arrows-left-right"></i><div><strong>Déplace le tambour-major</strong> avec les flèches (ou Q / D), ou en glissant le doigt sur l'écran.</div></li>
+                        <li><i class="fas fa-people-line"></i><div><strong>Les rangs suivent avec un temps de retard.</strong> Un virage trop brusque et la queue du défilé se fait surprendre.</div></li>
+                        <li><i class="fas fa-triangle-exclamation"></i><div><strong>Plots, flaques, barrières, voitures, pigeons, vélos</strong> : chaque obstacle touché fait sortir un musicien du rang.</div></li>
+                        <li><i class="fas fa-music"></i><div><strong>Attrape les notes</strong> pour gagner des points, et la <strong>lyre +1</strong> pour recruter un musicien.</div></li>
+                        <li><i class="fas fa-star"></i><div><strong>Reste bien aligné</strong> : une troupe droite fait monter le multiplicateur jusqu'à ×4.</div></li>
+                        <li><i class="fas fa-flag-checkered"></i><div>Plus tu avances, plus ça va vite. Combien de villes de la Brie traverseras-tu ?</div></li>
+                    </ul>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer wave-top">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <a href="./" aria-label="Des Lyres en Brie - accueil"><img class="footer-logo" src="images/logo.webp" alt="Des Lyres en Brie" width="150" height="186" loading="lazy"></a>
+                    <p>Association musicale loi 1901 née en Brie : nous faisons vivre la musique ici et partout où l'on nous invite.</p>
+                    <div class="socials">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="association">L'association</a></li>
+                        <li><a href="instruments">Instruments</a></li>
+                        <li><a href="agenda">Agenda</a></li>
+                        <li><a href="galerie">Galerie</a></li>
+                        <li><a href="livre-dor">Livre d'or</a></li>
+                        <li><a href="jeu">La Grande Parade</a></li>
+                        <li><a href="membres">Espace membres</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="mailto:contact@deslyresenbrie.fr"><i class="far fa-envelope"></i> contact@deslyresenbrie.fr</a></li>
+                        <li><a href="https://www.google.com/maps/search/?api=1&amp;query=Rue+des+Carri%C3%A8res+77169+Boissy-le-Ch%C3%A2tel" target="_blank" rel="noopener"><i class="fas fa-location-dot"></i> Rue des Carrières<br>77169 Boissy-le-Châtel</a></li>
+                        <li><a href="contact"><i class="fas fa-paper-plane"></i> Nous écrire</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; <span class="year"></span> Des Lyres en Brie</span>
+                <span>Fait avec <i class="fas fa-heart"></i> et beaucoup de musique</span>
+            </div>
+        </div>
+    </footer>
+
+    <button class="to-top" id="toTop" type="button" aria-label="Revenir en haut de la page"><i class="fas fa-arrow-up"></i></button>
+
+    <script src="js/data.js?v=41"></script>
+    <script src="js/jeu.js?v=1"></script>
+    <script src="js/main.js?v=41"></script>
+</body>
+</html>

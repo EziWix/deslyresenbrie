@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 
 SITE = Path(__file__).resolve().parent.parent
-VERSION = 40  # à incrémenter quand style.css, data.js ou main.js changent (cache des navigateurs)
+VERSION = 41  # à incrémenter quand style.css, data.js ou main.js changent (cache des navigateurs)
 
 NAV = [
     ("index.html", "fa-house", "Accueil"),
@@ -20,6 +20,7 @@ NAV = [
     ("agenda.html", "fa-calendar-days", "Agenda"),
     ("galerie.html", "fa-images", "Galerie"),
     ("livre-dor.html", "fa-feather-pointed", "Livre d'or"),
+    ("jeu.html", "fa-gamepad", "Jeu"),
 ]
 MAPS = "https://www.google.com/maps/search/?api=1&amp;query=Rue+des+Carri%C3%A8res+77169+Boissy-le-Ch%C3%A2tel"
 
@@ -99,6 +100,7 @@ def footer(extra_scripts):
                         <li><a href="agenda.html">Agenda</a></li>
                         <li><a href="galerie.html">Galerie</a></li>
                         <li><a href="livre-dor.html">Livre d'or</a></li>
+                        <li><a href="jeu.html">La Grande Parade</a></li>
                         <li><a href="membres.html">Espace membres</a></li>
                     </ul>
                 </div>
@@ -127,7 +129,7 @@ def footer(extra_scripts):
 """
 
 
-PAGES = "agenda|association|contact|galerie|instruments|livre-dor|membres"
+PAGES = "agenda|association|contact|galerie|instruments|jeu|livre-dor|membres"
 
 
 def clean_links(html):
