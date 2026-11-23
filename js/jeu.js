@@ -236,8 +236,8 @@
         // tambour-major : clavier ou glisser
         const dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
         if (dir) g.targetX = g.majorX + dir * 40;
-        const lim = 3 * COL_GAP / 2 + 8;
-        g.targetX = clamp(g.targetX, ROAD_L + lim, ROAD_R - lim);
+        // le tambour-major va jusqu'aux bordures ; la troupe, elle, reste sur la chaussée
+        g.targetX = clamp(g.targetX, ROAD_L + R + 2, ROAD_R - R - 2);
         const maxStep = 330 * dt;
         g.majorX += clamp(g.targetX - g.majorX, -maxStep, maxStep);
         g.mace += dt * (dir || Math.abs(g.targetX - g.majorX) > 2 ? 9 : 4);
@@ -247,6 +247,7 @@
         for (let r = 0; r < g.rowX.length; r++) {
             const lead = r === 0 ? g.majorX : g.rowX[r - 1];
             g.rowX[r] += (lead - g.rowX[r]) * k;
+            g.rowX[r] = clamp(g.rowX[r], ROAD_L + COL_GAP + R + 2, ROAD_R - COL_GAP - R - 2);
         }
 
         // alignement : la troupe bien droite fait grimper le multiplicateur
