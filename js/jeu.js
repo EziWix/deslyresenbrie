@@ -235,10 +235,10 @@
 
         // tambour-major : clavier ou glisser
         const dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
-        if (dir) g.targetX = g.majorX + dir * 40;
+        if (dir) g.targetX = g.majorX + dir * 360 * dt; // clavier : vitesse fixe
         // le tambour-major va jusqu'aux bordures ; la troupe, elle, reste sur la chaussée
         g.targetX = clamp(g.targetX, ROAD_L + R + 2, ROAD_R - R - 2);
-        const maxStep = 330 * dt;
+        const maxStep = 900 * dt;
         g.majorX += clamp(g.targetX - g.majorX, -maxStep, maxStep);
         g.mace += dt * (dir || Math.abs(g.targetX - g.majorX) > 2 ? 9 : 4);
 
@@ -722,15 +722,23 @@
     });
 
     // glisser (doigt ou souris) : déplacement relatif, le doigt ne cache pas le tambour-major
+    // souris : le tambour-major suit exactement le curseur (sans cliquer)
+    // doigt / stylet : glisser relatif 1:1, pour que le doigt ne cache pas le tambour-major
     let drag = null;
+    const toWorldX = clientX => {
+        const r = canvas.getBoundingClientRect();
+        return (clientX - r.left) * W / r.width;
+    };
     canvas.addEventListener('pointerdown', e => {
         if (state !== 'play') return;
+        if (e.pointerType === 'mouse') { g.targetX = toWorldX(e.clientX); return; }
         drag = { x: e.clientX, from: g.majorX, scale: W / canvas.getBoundingClientRect().width };
         canvas.setPointerCapture(e.pointerId);
     });
     canvas.addEventListener('pointermove', e => {
-        if (!drag || state !== 'play') return;
-        g.targetX = drag.from + (e.clientX - drag.x) * drag.scale * 1.25;
+        if (state !== 'play') return;
+        if (e.pointerType === 'mouse') { g.targetX = toWorldX(e.clientX); return; }
+        if (drag) g.targetX = drag.from + (e.clientX - drag.x) * drag.scale;
     });
     const endDrag = () => { drag = null; };
     canvas.addEventListener('pointerup', endDrag);
