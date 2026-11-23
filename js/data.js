@@ -61,3 +61,10 @@ const GUESTBOOK = [
    Tant qu'elle est vide, le formulaire affiche un message d'erreur.
 */
 const WEB3FORMS_KEY = "";
+
+/*
+   Classement du jeu « La Grande Parade » : URL du script Google (finit par /exec).
+   Installation expliquée en haut de outils/classement-apps-script.gs.
+   Tant qu'elle est vide, le classement n'apparaît pas.
+*/
+const CLASSEMENT_URL = "";

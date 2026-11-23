@@ -686,6 +686,7 @@
         $('paradeRecord').classList.toggle('is-record', record);
         $('paradeBest').textContent = `Ton record : ${best.toLocaleString('fr-FR')} points`;
         btnPause.disabled = true;
+        prepareSend({ score, metres: Math.floor(g.dist / 20), notes: g.notes, duree: Math.round(g.t * 10) / 10 });
         setTimeout(() => { overBox.hidden = false; draw(); }, 700);
         draw();
     }
@@ -706,6 +707,7 @@
 
     window.addEventListener('keydown', e => {
         const k = e.key;
+        if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
         if (k === 'ArrowLeft' || k === 'q' || k === 'Q' || k === 'a' || k === 'A') { keys.left = true; if (state === 'play') e.preventDefault(); }
         else if (k === 'ArrowRight' || k === 'd' || k === 'D') { keys.right = true; if (state === 'play') e.preventDefault(); }
         else if (k === 'p' || k === 'P' || k === 'Escape') { if (state === 'play' || state === 'pause') setPause(state === 'play'); }
@@ -713,6 +715,7 @@
     });
     window.addEventListener('keyup', e => {
         const k = e.key;
+        if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
         if (k === 'ArrowLeft' || k === 'q' || k === 'Q' || k === 'a' || k === 'A') keys.left = false;
         if (k === 'ArrowRight' || k === 'd' || k === 'D') keys.right = false;
     });
@@ -734,6 +737,85 @@
 
     document.addEventListener('visibilitychange', () => { if (document.hidden) setPause(true); });
     window.addEventListener('blur', () => setPause(true));
+
+    // ---------- Classement en ligne (script Google, cf. outils/classement-apps-script.gs) ----------
+    const URL_TOP = (typeof CLASSEMENT_URL !== 'undefined' && CLASSEMENT_URL) ? CLASSEMENT_URL : '';
+    const board = $('paradeBoard'), topList = $('paradeTop'), boardFoot = $('paradeBoardFoot');
+    const sendForm = $('paradeSend'), pseudoInput = $('paradePseudo'), sendMsg = $('paradeSendMsg');
+    const sendBtn = sendForm.querySelector('button');
+    const PSEUDO_OK = /^[\p{L}\p{N} _.\-']{2,16}$/u;
+    let pending = null, sent = false;
+    pseudoInput.value = store.get('parade-pseudo') || '';
+
+    function cleTxt(p) { return String(p).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+    function renderTop(top, joueurs, moi) {
+        topList.textContent = '';
+        if (!top || !top.length) {
+            const li = document.createElement('li');
+            li.className = 'parade-top-empty';
+            li.textContent = 'Personne pour l’instant : à toi de jouer !';
+            topList.appendChild(li);
+        }
+        const mine = cleTxt(moi || store.get('parade-pseudo') || '');
+        (top || []).forEach((r, i) => {
+            const li = document.createElement('li');
+            if (i < 3) li.classList.add('podium', 'p' + (i + 1));
+            if (mine && cleTxt(r.pseudo) === mine) li.classList.add('is-me');
+            const rank = document.createElement('span'); rank.className = 'rk'; rank.textContent = i + 1;
+            const name = document.createElement('span'); name.className = 'nm'; name.textContent = r.pseudo;
+            const pts = document.createElement('span'); pts.className = 'pt'; pts.textContent = Number(r.score).toLocaleString('fr-FR');
+            li.append(rank, name, pts);
+            topList.appendChild(li);
+        });
+        boardFoot.textContent = joueurs ? `${joueurs} joueur${joueurs > 1 ? 's' : ''} classé${joueurs > 1 ? 's' : ''}` : '';
+    }
+
+    function loadTop() {
+        if (!URL_TOP) return;
+        fetch(URL_TOP, { cache: 'no-store' })
+            .then(r => r.json())
+            .then(d => { if (d && d.ok) renderTop(d.top, d.joueurs); })
+            .catch(() => { topList.innerHTML = '<li class="parade-top-empty">Classement indisponible pour le moment.</li>'; });
+    }
+
+    function prepareSend(result) {
+        if (!URL_TOP) return;
+        pending = result; sent = false;
+        sendForm.hidden = result.score <= 0;
+        sendBtn.disabled = false;
+        sendMsg.textContent = ''; sendMsg.className = 'parade-send-msg';
+    }
+
+    sendForm.addEventListener('submit', e => {
+        e.preventDefault();
+        if (!pending || sent) return;
+        const pseudo = pseudoInput.value.trim().replace(/\s+/g, ' ');
+        if (!PSEUDO_OK.test(pseudo)) {
+            sendMsg.textContent = 'Pseudo de 2 à 16 caractères (lettres, chiffres, espace, - _ .).';
+            sendMsg.className = 'parade-send-msg is-error';
+            return;
+        }
+        store.set('parade-pseudo', pseudo);
+        sendBtn.disabled = true;
+        sendMsg.textContent = 'Envoi…'; sendMsg.className = 'parade-send-msg';
+        fetch(URL_TOP, { method: 'POST', body: JSON.stringify(Object.assign({ pseudo }, pending)) })
+            .then(r => r.json())
+            .then(d => {
+                if (!d || !d.ok) throw new Error((d && d.erreur) || 'Envoi refusé.');
+                sent = true;
+                sendMsg.textContent = d.rang ? `Envoyé ! Tu es ${d.rang === 1 ? '1er' : d.rang + 'e'} sur ${d.joueurs} 🎉` : 'Envoyé !';
+                sendMsg.className = 'parade-send-msg is-ok';
+                renderTop(d.top, d.joueurs, pseudo);
+            })
+            .catch(err => {
+                sendBtn.disabled = false;
+                sendMsg.textContent = err && err.message && !/fetch|network/i.test(err.message) ? err.message : 'Envoi impossible, réessaie dans un instant.';
+                sendMsg.className = 'parade-send-msg is-error';
+            });
+    });
+
+    if (URL_TOP) { board.hidden = false; loadTop(); }
 
     // ---------- Plein écran ----------
     const stage = $('paradeStage'), btnFull = $('paradeFull');

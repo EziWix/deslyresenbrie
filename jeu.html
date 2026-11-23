@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Paytone+One&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=42">
+    <link rel="stylesheet" href="css/style.css?v=43">
 </head>
 <body>
     <div class="scroll-progress" id="scrollProgress"></div>
@@ -79,6 +79,14 @@
                             <p class="parade-score" id="paradeScore">0</p>
                             <p class="parade-detail" id="paradeDetail"></p>
                             <p class="parade-record" id="paradeRecord"></p>
+                            <form class="parade-send" id="paradeSend" hidden>
+                                <label for="paradePseudo">Ton pseudo pour le classement</label>
+                                <div class="parade-send-row">
+                                    <input id="paradePseudo" name="pseudo" type="text" maxlength="16" minlength="2" autocomplete="nickname" placeholder="Ton pseudo" required>
+                                    <button class="btn btn-light" type="submit"><i class="fas fa-trophy"></i> Envoyer</button>
+                                </div>
+                                <p class="parade-send-msg" id="paradeSendMsg" role="status"></p>
+                            </form>
                             <button class="btn btn-primary" type="button" data-parade-start><i class="fas fa-rotate-right"></i> Rejouer</button>
                             <a class="parade-join" href="association#rejoindre">Envie de défiler pour de vrai ? Rejoins-nous <i class="fas fa-arrow-right"></i></a>
                         </div>
@@ -92,8 +100,15 @@
                     </div>
                 </div>
 
+                <div class="parade-side">
+                <section class="parade-board" id="paradeBoard" hidden>
+                    <h2>Le <span>classement</span></h2>
+                    <ol class="parade-top" id="paradeTop"><li class="parade-top-empty">Chargement…</li></ol>
+                    <p class="parade-board-foot" id="paradeBoardFoot"></p>
+                </section>
+
                 <aside class="parade-rules">
-                    <h2>Comment <span>jouer ?</span></h2>
+                    <h2>Comment <span>jouer&nbsp;?</span></h2>
                     <ul>
                         <li><i class="fas fa-arrows-left-right"></i><div><strong>Déplace le tambour-major</strong> avec les flèches (ou Q / D), ou en glissant le doigt sur l'écran.</div></li>
                         <li><i class="fas fa-people-line"></i><div><strong>Les rangs suivent avec un temps de retard</strong> et passent sans risque : seul le tambour-major peut se cogner.</div></li>
@@ -103,6 +118,7 @@
                         <li><i class="fas fa-flag-checkered"></i><div>Plus tu avances, plus ça va vite. Combien de villes de la Brie traverseras-tu ?</div></li>
                     </ul>
                 </aside>
+                </div>
             </div>
         </section>
     </main>
@@ -148,8 +164,8 @@
 
     <button class="to-top" id="toTop" type="button" aria-label="Revenir en haut de la page"><i class="fas fa-arrow-up"></i></button>
 
-    <script src="js/data.js?v=42"></script>
-    <script src="js/jeu.js?v=3"></script>
-    <script src="js/main.js?v=42"></script>
+    <script src="js/data.js?v=43"></script>
+    <script src="js/jeu.js?v=4"></script>
+    <script src="js/main.js?v=43"></script>
 </body>
 </html>
