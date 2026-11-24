@@ -16,9 +16,14 @@
     const ROW_GAP = 34, COL_GAP = 28, R = 9;
     const MAX_MUSICIANS = 12, START_MUSICIANS = 9;
     const BPM = 112;
-    const TOWNS = ['Chailly-en-Brie', 'Coulommiers', 'La Ferté-sous-Jouarre', 'Mareuil-lès-Meaux',
-        'Saint-Jean-les-Deux-Jumeaux', 'Pontault-Combault', 'Brie-Comte-Robert', 'Trélou-sur-Marne',
-        'Beaumont-sur-Oise', 'Vaires-sur-Marne', 'Paris', 'la tournée mondiale'];
+    // villes de la Brie et des environs, tirées dans un ordre différent à chaque partie
+    const TOWNS = ['Chailly-en-Brie', 'Coulommiers', 'Mouroux', 'Pommeuse', 'Faremoutiers', 'Jouy-sur-Morin',
+        'Saint-Cyr-sur-Morin', 'Villiers-sur-Morin', 'Crécy-la-Chapelle', 'Rebais', 'Jouarre', 'La Ferté-Gaucher',
+        'Provins', 'Nangis', 'Rozay-en-Brie', 'Fontenay-Trésigny', 'Tournan-en-Brie', 'Meaux', 'Esbly',
+        'Lagny-sur-Marne', 'Chelles', 'Torcy', 'Serris', 'Melun', 'Fontainebleau', 'Barbizon', 'Moret-sur-Loing',
+        'Nemours', 'Montereau-Fault-Yonne', 'Dammartin-en-Goële', 'Château-Thierry'];
+    const TOWNS_END = ['Paris', 'la tournée mondiale'];
+    const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
     const TOWN_EVERY = 300; // mètres
     const INSTRUMENTS = ['trompette', 'caisse', 'sax', 'tuba', 'trombone', 'trompette', 'cymbales', 'sax', 'caisse', 'tuba', 'trompette', 'trombone'];
 
@@ -44,14 +49,29 @@
     // ---------- Son ----------
     const tracks = (typeof TRACKS !== 'undefined' && TRACKS.length) ? TRACKS : [];
     let music = null, actx = null;
+    // les morceaux s'enchaînent dans un ordre mélangé (nouveau mélange à chaque tour complet)
+    let playlist = [], trackIdx = -1;
+    function nextTrack() {
+        if (!tracks.length) return null;
+        trackIdx++;
+        if (trackIdx >= playlist.length) {
+            const prev = playlist[playlist.length - 1];
+            playlist = shuffle(tracks);
+            if (playlist.length > 1 && playlist[0] === prev) playlist.push(playlist.shift()); // pas deux fois le même d'affilée
+            trackIdx = 0;
+        }
+        const a = new Audio(playlist[trackIdx].src);
+        a.volume = 0.45;
+        a.addEventListener('ended', () => {
+            if (music !== a) return;
+            music = nextTrack();
+            if (music && musicOn && state === 'play') music.play().catch(() => { });
+        });
+        return a;
+    }
     function playMusic() {
         if (!musicOn || !tracks.length) return;
-        if (!music) {
-            const t = tracks[Math.floor(Math.random() * tracks.length)];
-            music = new Audio(t.src);
-            music.loop = true;
-            music.volume = 0.45;
-        }
+        if (!music) music = nextTrack();
         music.play().catch(() => { });
     }
     function stopMusic(reset) {
@@ -112,6 +132,7 @@
             objs: [], fx: [], decor: [], crowd: [],
             nextSpawn: 420, spawnFlip: 0,
             nextTown: TOWN_EVERY, townIdx: 0, town: 'Boissy-le-Châtel',
+            route: shuffle(TOWNS).concat(TOWNS_END),
             toast: { text: 'Départ : Boissy-le-Châtel', t: 2.4 },
             shake: 0, flash: 0, mace: 0,
         };
@@ -272,7 +293,7 @@
 
         // villes traversées
         if (meters >= g.nextTown) {
-            g.town = TOWNS[Math.min(g.townIdx, TOWNS.length - 1)];
+            g.town = g.route[Math.min(g.townIdx, g.route.length - 1)];
             g.townIdx++;
             g.nextTown += TOWN_EVERY;
             g.objs.push({ type: 'arche', y: -60, text: g.town, deco: true });
