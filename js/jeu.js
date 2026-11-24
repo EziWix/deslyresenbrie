@@ -827,23 +827,33 @@
     if (URL_TOP) { board.hidden = false; loadTop(); }
 
     // ---------- Plein écran ----------
+    // Le jeu occupe tout l'écran grâce à une classe CSS (marche partout, iPhone compris),
+    // et on demande en plus le vrai plein écran au navigateur quand il le permet
+    // (Android, ordinateur) pour cacher aussi la barre d'adresse.
     const stage = $('paradeStage'), btnFull = $('paradeFull');
     const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
-    if (!(stage.requestFullscreen || stage.webkitRequestFullscreen)) {
-        btnFull.hidden = true; // iPhone : pas de plein écran pour un élément de page
-    } else {
-        btnFull.addEventListener('click', () => {
+    let fullOn = false;
+    function setFull(on) {
+        fullOn = on;
+        stage.classList.toggle('is-full', on);
+        document.documentElement.classList.toggle('parade-full-lock', on);
+        if (on) {
             const req = stage.requestFullscreen || stage.webkitRequestFullscreen;
-            Promise.resolve(req.call(stage)).catch(() => { });
-        });
-        $('paradeExitFull').addEventListener('click', () => {
+            if (req && !fsElement()) Promise.resolve(req.call(stage)).catch(() => { });
+            if (screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(() => { });
+        } else if (fsElement()) {
             const exit = document.exitFullscreen || document.webkitExitFullscreen;
-            if (fsElement()) Promise.resolve(exit.call(document)).catch(() => { });
-        });
-        const onFs = () => requestAnimationFrame(resize);
-        document.addEventListener('fullscreenchange', onFs);
-        document.addEventListener('webkitfullscreenchange', onFs);
+            Promise.resolve(exit.call(document)).catch(() => { });
+        }
+        requestAnimationFrame(resize);
+        setTimeout(resize, 250);
     }
+    btnFull.addEventListener('click', () => setFull(true));
+    $('paradeExitFull').addEventListener('click', () => setFull(false));
+    const onFs = () => { if (!fsElement() && fullOn && stage.dataset.native === '1') setFull(false); stage.dataset.native = fsElement() ? '1' : ''; requestAnimationFrame(resize); };
+    document.addEventListener('fullscreenchange', onFs);
+    document.addEventListener('webkitfullscreenchange', onFs);
+    window.addEventListener('keydown', e => { if (e.key === 'Escape' && fullOn && !fsElement()) setFull(false); });
 
     resize();
     // les polices du titre arrivent après le premier dessin

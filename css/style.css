@@ -861,13 +861,21 @@ a.chip:hover { background: var(--red); border-color: var(--red); }
 .parade-col { width: min(100%, 600px, calc((100svh - 110px) * .6)); margin: 0 auto; }
 .parade-stage { position: relative; }
 .parade-exit-full { display: none; }
-.parade-stage:fullscreen { display: flex; align-items: center; justify-content: center; background: var(--ink); padding: 0; }
-.parade-stage:fullscreen .parade-wrap { height: 100%; width: auto; max-width: 100%; border: 0; border-radius: 0; box-shadow: none; }
-.parade-stage:fullscreen .parade-exit-full {
-    display: grid; place-items: center; position: absolute; right: 16px; bottom: 16px; width: 48px; height: 48px;
-    border: 0; border-radius: 14px; background: rgba(255, 255, 255, .14); color: #fff; font-size: 1.1rem; cursor: pointer;
+.parade-stage.is-full, .parade-stage:fullscreen {
+    position: fixed; inset: 0; z-index: 10000; width: 100%; height: 100vh; height: 100dvh;
+    display: flex; align-items: center; justify-content: center; background: var(--ink); padding: 0;
 }
-.parade-stage:fullscreen .parade-exit-full:hover { background: rgba(255, 255, 255, .25); }
+.parade-stage.is-full .parade-wrap, .parade-stage:fullscreen .parade-wrap {
+    width: min(100vw, 100dvh * .6); height: auto; aspect-ratio: 3 / 5;
+    border: 0; border-radius: 0; box-shadow: none;
+}
+.parade-stage.is-full .parade-exit-full, .parade-stage:fullscreen .parade-exit-full {
+    display: grid; place-items: center; position: absolute; right: 14px; bottom: 14px; width: 48px; height: 48px;
+    border: 0; border-radius: 14px; background: rgba(255, 255, 255, .16); color: #fff; font-size: 1.1rem; cursor: pointer; z-index: 2;
+}
+.parade-stage.is-full .parade-exit-full:hover, .parade-stage:fullscreen .parade-exit-full:hover { background: rgba(255, 255, 255, .28); }
+html.parade-full-lock, html.parade-full-lock body { overflow: hidden; overscroll-behavior: none; }
+html.parade-full-lock .to-top, html.parade-full-lock .site-header { visibility: hidden; }
 .parade-wrap {
     position: relative; width: 100%; aspect-ratio: 3 / 5;
     border-radius: 26px; overflow: hidden; background: var(--ink);
