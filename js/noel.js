@@ -1,6 +1,6 @@
 /* =========================================================
    Mode Noël : neige, guirlande lumineuse sur l'en-tête,
-   bonnet sur la lyre, petit message dans l'accueil.
+   logo de Noël à la place de la lyre, petit message dans l'accueil.
    S'active avec MODE_NOEL = true dans js/data.js.
    ========================================================= */
 (() => {
@@ -9,14 +9,12 @@
     root.classList.add('noel');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // ---------- Bonnet sur la lyre de l'en-tête ----------
-    const HAT = `<svg class="noel-hat" viewBox="0 0 64 48" aria-hidden="true">
-        <path d="M6 38 C14 18 30 6 50 8 C56 9 60 14 58 20 C52 16 44 18 40 26 C36 32 34 36 34 38 Z" fill="#e3131f"/>
-        <path d="M14 30 C22 18 34 12 48 12" stroke="#ff5a63" stroke-width="3" fill="none" opacity=".55"/>
-        <rect x="2" y="34" width="38" height="11" rx="5.5" fill="#fff"/>
-        <circle cx="58" cy="21" r="6" fill="#fff"/>
-    </svg>`;
-    document.querySelectorAll('.site-header .logo').forEach(l => l.insertAdjacentHTML('afterbegin', HAT));
+    // ---------- Logo de Noël à la place de la lyre (en-tête, écran du jeu) ----------
+    document.querySelectorAll('img.logo-mark, .parade-overlay img[src*="logo-mark"]').forEach(img => {
+        img.src = 'images/saisons/noel.webp';
+        img.classList.add('noel-logo');
+        img.removeAttribute('width'); img.removeAttribute('height');
+    });
 
     // ---------- Guirlande lumineuse sous la pilule d'en-tête ----------
     const COLORS = ['#ff3b3b', '#ffd34d', '#4cd97b', '#4db2ff', '#ff8ad8'];
