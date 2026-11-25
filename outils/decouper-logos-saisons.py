@@ -16,7 +16,7 @@ OUT = SITE / "images" / "saisons"
 
 # zones approximatives de chaque autocollant sur la planche 1536 x 1024
 ZONES = {
-    "noel": (40, 30, 505, 505),
+    "noel": (15, 0, 506, 514),
     "paques": (530, 30, 1010, 505),
     "ete": (1020, 30, 1500, 505),
     "halloween": (260, 510, 730, 1010),
