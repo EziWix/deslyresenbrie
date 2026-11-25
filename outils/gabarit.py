@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 
 SITE = Path(__file__).resolve().parent.parent
-VERSION = 46  # à incrémenter quand style.css, data.js ou main.js changent (cache des navigateurs)
+VERSION = 47  # à incrémenter quand style.css, data.js ou main.js changent (cache des navigateurs)
 
 NAV = [
     ("index.html", "fa-house", "Accueil"),
@@ -123,6 +123,7 @@ def footer(extra_scripts):
     <button class="to-top" id="toTop" type="button" aria-label="Revenir en haut de la page"><i class="fas fa-arrow-up"></i></button>
 
     <script src="js/data.js?v={VERSION}"></script>
+    <script src="js/noel.js?v={VERSION}"></script>
 {extra}    <script src="js/main.js?v={VERSION}"></script>
 </body>
 </html>
@@ -146,7 +147,7 @@ def rebuild(path):
     main = re.search(r"<main>(.*)</main>", src, re.S).group(1)
     tail = src[src.index("</main>"):]
     scripts = [s for s in re.findall(r"<script\b.*?</script>", tail, re.S)
-               if "js/data.js" not in s and "js/main.js" not in s]
+               if "js/data.js" not in s and "js/main.js" not in s and "js/noel.js" not in s]
     page = head(title, desc, robots) + header(path.name) + "    <main>" + main + "</main>\n" + footer(scripts)
     page = clean_links(page)
     path.write_text(page, encoding="utf-8", newline="\n")

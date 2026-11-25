@@ -68,3 +68,9 @@ const WEB3FORMS_KEY = "";
    Tant qu'elle est vide, le classement n'apparaît pas.
 */
 const CLASSEMENT_URL = "https://script.google.com/macros/s/AKfycbzGCCoLnuYByTmV8D2X0AY-sOxsxoVnFBMJ6NQp_o1QbYcBkZ6NhVJbfTr_7jUXlr7e/exec";
+
+/*
+   Mode Noël : neige, guirlande lumineuse, bonnet sur la lyre, message de fêtes
+   et version enneigée du jeu. Mettre false pour le retirer (après les fêtes).
+*/
+const MODE_NOEL = true;

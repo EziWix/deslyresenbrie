@@ -24,6 +24,7 @@
         'Nemours', 'Montereau-Fault-Yonne', 'Dammartin-en-Goële', 'Château-Thierry'];
     const TOWNS_END = ['Paris', 'la tournée mondiale'];
     const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+    const NOEL = typeof MODE_NOEL !== 'undefined' && !!MODE_NOEL;
     const TOWN_EVERY = 300; // mètres
     const INSTRUMENTS = ['trompette', 'caisse', 'sax', 'tuba', 'trombone', 'trompette', 'cymbales', 'sax', 'caisse', 'tuba', 'trompette', 'trombone'];
 
@@ -133,7 +134,7 @@
             nextSpawn: 420, spawnFlip: 0,
             nextTown: TOWN_EVERY, townIdx: 0, town: 'Boissy-le-Châtel',
             route: shuffle(TOWNS).concat(TOWNS_END),
-            toast: { text: 'Départ : Boissy-le-Châtel', t: 2.4 },
+            toast: { text: NOEL ? 'Joyeux Noël ! Départ : Boissy' : 'Départ : Boissy-le-Châtel', t: 2.4 },
             shake: 0, flash: 0, mace: 0,
         };
         // décor initial : maisons + public sur tout l'écran
@@ -423,6 +424,7 @@
                 ctx.fillStyle = 'rgba(0,0,0,.35)';
                 ctx.fillRect(x, d.y + d.h - 2, w, 2);
                 if (d.win) { ctx.fillStyle = '#6b4a3a'; ctx.fillRect(x + w / 2 - 5, d.y + d.h / 2 - 6, 10, 12); }
+                if (NOEL) { ctx.fillStyle = 'rgba(255,255,255,.82)'; ctx.fillRect(d.side ? x + w - 9 : x, d.y + 2, 9, d.h - 4); ctx.fillRect(x, d.y, w, 4); }
             } else if (d.kind === 'lamp') {
                 const x = d.side ? ROAD_R + 6 : ROAD_L - 6;
                 ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.arc(x + 3, d.y + 3, 6, 0, 7); ctx.fill();
@@ -600,10 +602,32 @@
         ctx.strokeStyle = '#d9d2c6'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
         ctx.beginPath(); ctx.moveTo(mx - Math.cos(a) * 13, my - Math.sin(a) * 13); ctx.lineTo(mx + Math.cos(a) * 13, my + Math.sin(a) * 13); ctx.stroke();
         ctx.fillStyle = C.gold; ctx.beginPath(); ctx.arc(mx + Math.cos(a) * 13, my + Math.sin(a) * 13, 3.5, 0, 7); ctx.fill();
+        if (NOEL) {
+            // bonnet de Père Noël vu du dessus
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y - 1, 7, 0, 7); ctx.fill();
+            ctx.fillStyle = C.red; ctx.beginPath(); ctx.arc(x, y - 1, 5, 0, 7); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x - 3, y - 4); ctx.quadraticCurveTo(x + 2, y - 14, x + 8, y - 12); ctx.lineTo(x + 3, y - 3); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x + 8, y - 12, 2.6, 0, 7); ctx.fill();
+            return;
+        }
         // grand plumet
         ctx.fillStyle = C.ink; ctx.beginPath(); ctx.arc(x, y - 1, 6.5, 0, 7); ctx.fill();
         ctx.fillStyle = C.red; ctx.beginPath(); ctx.ellipse(x, y - 6, 3.5, 6, 0, 0, 7); ctx.fill();
         ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y - 9, 2.2, 0, 7); ctx.fill();
+    }
+
+    // ---------- Neige (mode Noël) ----------
+    const snow = [];
+    if (NOEL) for (let i = 0; i < 70; i++) snow.push({ x: Math.random() * W, y: Math.random() * H, r: .8 + Math.random() * 2.2, ph: Math.random() * 6.28 });
+    function drawSnow(dt, scroll) {
+        ctx.fillStyle = 'rgba(255,255,255,.85)';
+        for (const f of snow) {
+            f.y += (22 + f.r * 12) * dt + scroll * .35;
+            f.ph += dt;
+            f.x += Math.sin(f.ph) * 10 * dt;
+            if (f.y > H + 4) { f.y = -4; f.x = Math.random() * W; }
+            ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 7); ctx.fill();
+        }
     }
 
     function drawBand() {
@@ -674,7 +698,11 @@
         ctx.textBaseline = 'alphabetic';
     }
 
+    let snowLast = 0;
     function draw() {
+        const nowT = performance.now();
+        const snowDt = state === 'play' && snowLast ? Math.min(.05, (nowT - snowLast) / 1000) : 0;
+        snowLast = nowT;
         ctx.save();
         if (g && g.shake > 0) ctx.translate(rand(-4, 4) * g.shake * 3, rand(-4, 4) * g.shake * 3);
         ctx.fillStyle = '#d8c8c2'; ctx.fillRect(-10, -10, W + 20, H + 20);
@@ -687,6 +715,7 @@
             for (const o of g.objs) if (o.type === 'arche') drawObject(o);
             drawFx();
             if (g.flash > 0) { ctx.fillStyle = `rgba(227,19,31,${g.flash})`; ctx.fillRect(0, 0, W, H); }
+            if (NOEL) drawSnow(snowDt, g.speed * snowDt);
             drawHud();
         } else {
             drawBand();

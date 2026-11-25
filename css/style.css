@@ -955,3 +955,27 @@ html.parade-full-lock .to-top, html.parade-full-lock .site-header { visibility: 
 .parade-send-msg { font-size: .85rem !important; min-height: 1.2em; max-width: none !important; }
 .parade-send-msg.is-ok { color: #f2c14e !important; font-weight: 600; }
 .parade-send-msg.is-error { color: var(--red-hi) !important; }
+
+/* =========================================================
+   Mode Noël (js/noel.js, activé par MODE_NOEL dans data.js)
+   ========================================================= */
+.noel-snow { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 90; }
+html.parade-full-lock .noel-snow { display: none; }
+.noel .site-header .logo { position: relative; }
+.noel-hat { position: absolute; width: 34px; left: 9px; top: -15px; transform: rotate(-14deg); pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .35)); }
+.noel-lights { position: absolute; left: 20px; right: 20px; bottom: -11px; height: 20px; pointer-events: none; }
+.noel-lights svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.noel-lights span {
+    position: absolute; width: 7px; height: 11px; margin-left: -3.5px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+    background: var(--c); box-shadow: 0 0 8px 2px var(--c);
+    animation: noel-blink 1.4s ease-in-out infinite alternate; animation-delay: var(--d);
+}
+.noel-lights span::before { content: ""; position: absolute; left: 1.5px; top: -3px; width: 4px; height: 4px; border-radius: 1px; background: #4a3a2a; }
+@keyframes noel-blink { from { opacity: 1; } to { opacity: .35; box-shadow: 0 0 2px 0 var(--c); } }
+.noel-greeting {
+    display: inline-flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 6px 14px; border-radius: 999px;
+    background: #fff; color: var(--red-sh); font-weight: 700; font-size: .86rem; box-shadow: 0 5px 0 #e3c9c6;
+}
+.noel-greeting i { color: #4db2ff; }
+.noel .hero-content > .noel-greeting + .hero-badge { margin-left: 8px; }
+@media (prefers-reduced-motion: reduce) { .noel-lights span { animation: none; } }
