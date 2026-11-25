@@ -11,14 +11,14 @@
 
     // ---------- Logo de Noël à la place de la lyre (en-tête, écran du jeu) ----------
     document.querySelectorAll('img.logo-mark, .parade-overlay img[src*="logo-mark"]').forEach(img => {
-        img.src = 'images/saisons/noel.webp';
+        img.src = 'images/saisons/noel.webp?v=2';
         img.classList.add('noel-logo');
         img.removeAttribute('width'); img.removeAttribute('height');
     });
 
     // grand logo de l'accueil : lyre de Noël + texte « Des Lyres en Brie »
     document.querySelectorAll('img.hero-logo').forEach(img => {
-        img.src = 'images/saisons/noel-grand.webp';
+        img.src = 'images/saisons/noel-grand.webp?v=2';
         img.width = 706; img.height = 782;
     });
 

@@ -78,11 +78,24 @@ def detoure(im):
                 gp[x, y] = 255
     poches = gris.filter(ImageFilter.MinFilter(7)).filter(ImageFilter.MaxFilter(9))
     pp = poches.load()
+    # poches de fond un peu rosées (reflet rouge du logo) : gris moyen peu saturé, zone épaisse,
+    # puis on s'étend de proche en proche sur toute la poche (bords compris)
+    cand = bytearray(w * h)
+    for y in range(h):
+        for x in range(w):
+            r, g, b = px[x, y][:3]
+            lum = (r + g + b) / 3
+            if not vu[y * w + x] and 80 < lum < 206 and max(r, g, b) - min(r, g, b) < 80:
+                cand[y * w + x] = 1
+    cmask = Image.frombytes("L", (w, h), bytes(v * 255 for v in cand))
+    graines = cmask.filter(ImageFilter.MinFilter(9)).load()
+    depart = [(x, y) for y in range(h) for x in range(w) if graines[x, y]]
+    poche = remplit(w, h, lambda x, y: cand[y * w + x] == 1, depart)
     masque = Image.new("L", (w, h), 255)
     mp = masque.load()
     for y in range(h):
         for x in range(w):
-            if vu[y * w + x] or (pp[x, y] and gp[x, y]):
+            if vu[y * w + x] or (pp[x, y] and gp[x, y]) or poche[y * w + x]:
                 mp[x, y] = 0
     # bord adouci (anticrénelage) sans manger le contour blanc
     masque = masque.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
