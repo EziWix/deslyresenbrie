@@ -104,3 +104,20 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def grand_logo(nom):
+    """Logo de saison + le texte « DES LYRES EN BRIE » repris du grand logo (pour l'accueil)."""
+    logo = Image.open(SITE / "images" / "logo.png").convert("RGBA")
+    texte = logo.crop((0, 524, logo.width, 775))
+    texte = texte.crop(texte.getbbox())
+    saison = Image.open(OUT / f"{nom}.webp").convert("RGBA")
+    h = 560
+    saison = saison.resize((round(saison.width * h / saison.height), h), Image.LANCZOS)
+    chevauche = 26
+    W = max(texte.width, saison.width)
+    out = Image.new("RGBA", (W, h + texte.height - chevauche), (0, 0, 0, 0))
+    out.alpha_composite(saison, ((W - saison.width) // 2, 0))
+    out.alpha_composite(texte, ((W - texte.width) // 2, h - chevauche))
+    out.save(OUT / f"{nom}-grand.webp", quality=90, method=6)
+    print(f"{nom}-grand  {out.size}")

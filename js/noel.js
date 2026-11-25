@@ -16,6 +16,12 @@
         img.removeAttribute('width'); img.removeAttribute('height');
     });
 
+    // grand logo de l'accueil : lyre de Noël + texte « Des Lyres en Brie »
+    document.querySelectorAll('img.hero-logo').forEach(img => {
+        img.src = 'images/saisons/noel-grand.webp';
+        img.width = 706; img.height = 782;
+    });
+
     // ---------- Guirlande lumineuse sous la pilule d'en-tête ----------
     const COLORS = ['#ff3b3b', '#ffd34d', '#4cd97b', '#4db2ff', '#ff8ad8'];
     const inner = document.querySelector('.header-inner');
